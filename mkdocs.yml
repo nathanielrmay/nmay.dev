@@ -1,0 +1,11 @@
+site_name: American Football Game
+
+theme:
+  name: terminal
+
+extra_css:
+  - style.css
+
+plugins:
+  - search
+  - awesome-pages

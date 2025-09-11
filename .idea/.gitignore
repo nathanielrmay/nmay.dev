@@ -13,7 +13,6 @@
 /prompts/
 aider.yaml.conf
 
-mkdocs.yml
 .aider.chat.history.md
 .aider.input.history
 
