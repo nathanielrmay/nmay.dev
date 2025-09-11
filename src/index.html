@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome</title>
+    <style>
+        /* Basic CSS Reset */
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden;
+            font-family: monospace;
+            background-color: #000;
+        }
+
+        /* Canvas background */
+        #background-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1; /* Behind the content */
+            opacity: 0.6;
+        }
+
+        /* Centered content container */
+        .content-container {
+            position: relative;
+            z-index: 2; /* In front of the canvas */
+            color: #e0e0e0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .quote {
+            font-size: 1.5rem;
+            text-shadow: 0 0 5px #000;
+        }
+
+        .author {
+            margin-top: 1rem;
+            font-size: 1.2rem;
+            color: #a0a0a0;
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="background-canvas"></canvas>
+
+    <div class="content-container">
+        <div>
+            <p class="quote">"The purpose of computing is insight, not numbers."</p>
+            <p class="author">- Richard Hamming</p>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('background-canvas');
+        const ctx = canvas.getContext('2d');
+
+        // Set canvas to full screen
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        // Characters for the digital rain
+        const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        const charactersArray = characters.split('');
+        
+        const fontSize = 4;
+        const columns = canvas.width / fontSize;
+
+        // An array to store the y-position of each rain drop
+        let drops = [];
+        for (let x = 0; x < columns; x++) {
+            drops[x] = 1;
+        }
+
+        // The drawing function
+        function draw() {
+            // Fill the canvas with a semi-transparent black to create a fading effect
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.fillStyle = '#0F0'; // Green text
+            ctx.font = fontSize + 'px monospace';
+
+            // Loop over the drops
+            for (let i = 0; i < drops.length; i++) {
+                // Get a random character
+                const text = charactersArray[Math.floor(Math.random() * charactersArray.length)];
+                
+                // Draw the character
+                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+                // Reset the drop to the top if it has gone off-screen
+                // Add randomness to make the rain effect more natural
+                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                    drops[i] = 0;
+                }
+
+                // Increment the y-position
+                drops[i]++;
+            }
+        }
+        
+        // Animation loop
+        setInterval(draw, 33);
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            // Recalculate drops for new width
+            const newColumns = canvas.width / fontSize;
+            drops = [];
+            for (let x = 0; x < newColumns; x++) {
+                drops[x] = 1;
+            }
+        });
+
+    </script>
+</body>
+</html>
