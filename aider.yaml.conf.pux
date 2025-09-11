@@ -1,0 +1,74 @@
+##########################################################
+# Place in your home dir, or at the root of your git repo.
+##########################################################
+
+# Note: You can only put OpenAI and Anthropic API keys in the YAML
+# config file. Keys for all APIs can be stored in a .env file
+# https://aider.chat/docs/config/dotenv.html
+
+##########
+# options:
+
+## show this help message and exit
+#help: xxx
+
+#############
+# Main model:
+
+## Specify the model to use for the main chat
+model: "pro"
+
+########################
+# API Keys and settings:
+
+## Specify the OpenAI API key
+openai-api-key: sk-proj-xxx
+
+## Specify the Anthropic API key
+anthropic-api-key: sk-ant-api03--xxx
+## Set an environment variable (to control API settings, can be used multiple times)
+#set-env: xxx
+## Specify multiple values like this:
+set-env:
+  - GEMINI_API_KEY=xxx
+  - DEEPSEEK_API_KEY=sk-xxx
+  - OPENROUTER_API_key=sk-or-v1-xxx
+
+## Set an API key for a provider (eg: --api-key provider=<key> sets PROVIDER_API_KEY=<key>)
+#api-key: xxx
+## Specify multiple values like this:
+api-key:
+  - TOGETHERAI_API_key=xxx
+  - MISTRAL_API_key=xxx
+  - DEEPINFRA_API_key=xxx
+  - NOVITA_API_key=xxx
+
+#################
+# Model settings:
+## Add a model alias (can be used multiple times)
+#alias: xxx
+## Specify multiple values like this:
+alias:
+  - "sonnet:anthropic/claude-sonnet-4-20250514"
+  - "opus:anthropic/claude-opus-4-20250514"
+  - "dscoder:deepseek-coder"
+  - "flash:gemini/gemini-2.5-flash"
+  - "pro:gemini/gemini-2.5-pro"
+  - "gpt:gpt-4.1"
+  - "o3:o3-mini"
+  - "o4:o4-mini"
+  - "qwencode:openrouter/qwen/qwen-2.5-coder-32b-instruct"
+  -
+# Use architect edit format for the main chat
+architect: true
+
+# Specify the model to use for commit messages and chat history summarization (default depends on --model)
+weak-model: flash
+
+# Specify the model to use for editor tasks (default depends on --model)
+editor-model: pro
+
+## Soft limit on tokens for chat history, after which summarization begins. If unspecified, defaults to the model's max_chat_history_tokens.
+#max-chat-history-tokens: xxx
+
+
