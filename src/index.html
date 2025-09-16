@@ -54,8 +54,8 @@
 
     <div class="content-container">
         <div>
-            <p class="quote">"The purpose of computing is insight, not numbers."</p>
-            <p class="author">- Richard Hamming</p>
+            <p class="quote" style="font-size: 40px;">"The purpose of computing is insight, not numbers."</p>
+            <p class="author" style="font-size: 20px;">- Richard Hamming</p>
         </div>
     </div>
 
@@ -68,10 +68,10 @@
         canvas.height = window.innerHeight;
 
         // Characters for the digital rain
-        const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        const characters = '0123456789';
         const charactersArray = characters.split('');
         
-        const fontSize = 4;
+        const fontSize = 40;
         const columns = canvas.width / fontSize;
 
         // An array to store the y-position of each rain drop
@@ -109,7 +109,7 @@
         }
         
         // Animation loop
-        setInterval(draw, 33);
+        setInterval(draw, 200);
 
         // Handle window resize
         window.addEventListener('resize', () => {
