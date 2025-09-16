@@ -12,7 +12,8 @@ PG_USER <- "than"
 PG_PASSWORD <- "Eattherich3537!"
 
 # --- Define Seasons ---
-historical_seasons <- 1999:2024
+last_historic_season <- 2024
+HISTORIC_SCHEMA = "nfl_historic"
 
 # --- Connect to PostgreSQL ---
 message("Connecting to PostgreSQL database...")
@@ -24,325 +25,175 @@ con <- dbConnect(RPostgres::Postgres(),
                  password = PG_PASSWORD)
 message("Connection successful.")
 
-message("\n--- Processing Play-by-Play Data ---")
-message("Downloading all historical play-by-play data...")
-pbp_df <- nflreadr::load_pbp(1999:2024)
+message(paste("Ensuring schema '", HISTORIC_SCHEMA, "' exists..."))
+dbExecute(con, paste("CREATE SCHEMA IF NOT EXISTS", HISTORIC_SCHEMA))
+
+message("Downloading all play-by-play data...")
+pbp_df <- nflreadr::load_pbp(1999:last_historic_season)
 message(paste("Downloaded", nrow(pbp_df), "rows of PBP data."))
-message("Writing PBP data to PostgreSQL table 'play_by_play'...")
-dbWriteTable(con, "nfl_historic.play_by_play", pbp_df, overwrite = TRUE, row.names = FALSE)
-message("Successfully wrote PBP data.")
+message("Writing data to table 'play_by_play'...")
+dbWriteTable(con, DBI::Id( schema=HISTORIC_SCHEMA, table="play_by_play" ), pbp_df, overwrite = TRUE, row.names = FALSE)
+message("Successfully wrote data.")
 rm(pbp_df) # Clean up memory
 gc()       # Force garbage collection
-
-message("\n--- Processing Play-by-Play Dictionary ---")
-message("Downloading PBP dictionary...")
-pbp_dict_df <- nflreadr::dictionary_pbp
-message(paste("Downloaded", nrow(pbp_dict_df), "dictionary entries."))
-message("Writing PBP dictionary to PostgreSQL table 'dictionary_play_by_play'...")
-dbWriteTable(con, "nfl_historic.dict_play_by_play", pbp_dict_df, overwrite = TRUE, row.names = FALSE)
-message("Successfully wrote PBP dictionary.")
-rm(pbp_dict_df) # Clean up memory
 
 message("\n--- Processing Player Stats Data ---")
-pbp_df <- nflreadr::load_player_stats(1999:2024)
+pbp_df <- nflreadr::load_player_stats(1999:last_historic_season)
 message(paste("Downloaded", nrow(pbp_df), "rows of PBP data."))
-message("Writing PBP data to PostgreSQL table 'player_stats'...")
-dbWriteTable(con, "nfl_historic.player_stats", pbp_df, overwrite = TRUE, row.names = FALSE)
-message("Successfully wrote PBP data.")
-rm(pbp_df) # Clean up memory
-gc()       # Force garbage collection
-
-message("\n--- Processing Player Stats Dictionary ---")
-message("Downloading PBP dictionary...")
-pbp_dict_df <- nflreadr::dictionary_player_stats
-message(paste("Downloaded", nrow(pbp_dict_df), "dictionary entries."))
-message("Writing PBP dictionary to PostgreSQL table 'dictionary_player_stats'...")
-dbWriteTable(con, "nfl_historic.dict_player_stats", pbp_dict_df, overwrite = TRUE, row.names = FALSE)
-message("Successfully wrote PBP dictionary.")
-rm(pbp_dict_df) # Clean up memory
-
-message("\n--- Processing Data ---")
-message("Downloading all historical Player Stats data...")
-pbp_df <- nflreadr::load_team_stats(1999:2024)
-message(paste("Downloaded", nrow(pbp_df), "rows of data."))
-message("Writing PBP data to PostgreSQL table 'team_stats'...")
-dbWriteTable(con, "nfl_historic.team_stats", pbp_df, overwrite = TRUE, row.names = FALSE)
+message("Writing data to table 'player_stats'...")
+dbWriteTable(con, DBI::Id( schema=HISTORIC_SCHEMA, table="player_stats" ), pbp_df, overwrite = TRUE, row.names = FALSE)
 message("Successfully wrote data.")
 rm(pbp_df) # Clean up memory
 gc()       # Force garbage collection
 
-message("\n--- Processing Dictionary ---")
-message("Downloading PBP dictionary...")
-pbp_dict_df <- nflreadr::dictionary_team_stats
-message(paste("Downloaded", nrow(pbp_dict_df), "dictionary entries."))
-message("Writing PBP dictionary to PostgreSQL table 'dictionary_team_stats'...")
-dbWriteTable(con, "nfl_historic.dictionary_team_stats", pbp_dict_df, overwrite = TRUE, row.names = FALSE)
-message("Successfully wrote dictionary.")
-rm(pbp_dict_df) # Clean up memory
-
-message("\n--- Processing Data ---")
-message("Downloading all historical Player Stats data...")
-pbp_df <- nflreadr::load_participation(2016:2024)
+message("Downloading all historical Team Stats data...")
+pbp_df <- nflreadr::load_team_stats(1999:last_historic_season)
 message(paste("Downloaded", nrow(pbp_df), "rows of data."))
-message("Writing PBP data to PostgreSQL table 'participation'...")
-dbWriteTable(con, "nfl_historic.participation", pbp_df, overwrite = TRUE, row.names = FALSE)
+message("Writing data to table 'team_stats'...")
+dbWriteTable(con, DBI::Id( schema=HISTORIC_SCHEMA, table="team_stats" ), pbp_df, overwrite = TRUE, row.names = FALSE)
 message("Successfully wrote data.")
 rm(pbp_df) # Clean up memory
 gc()       # Force garbage collection
 
-message("\n--- Processing Dictionary ---")
-message("Downloading PBP dictionary...")
-pbp_dict_df <- nflreadr::dictionary_participation
-message(paste("Downloaded", nrow(pbp_dict_df), "dictionary entries."))
-message("Writing PBP dictionary to PostgreSQL table 'dictionary_participation'...")
-dbWriteTable(con, "nfl_historic.dictionary_participation", pbp_dict_df, overwrite = TRUE, row.names = FALSE)
-message("Successfully wrote dictionary.")
-rm(pbp_dict_df) # Clean up memory
-
-message("\n--- Processing Data ---")
-message("Downloading all historical Player Stats data...")
-pbp_df <- nflreadr::load_rosters(1999:2024)
+message("Downloading all historical Participation data...")
+pbp_df <- nflreadr::load_participation(2016:last_historic_season)
 message(paste("Downloaded", nrow(pbp_df), "rows of data."))
-message("Writing PBP data to PostgreSQL table 'rosters'...")
-dbWriteTable(con, "nfl_historic.rosters", pbp_df, overwrite = TRUE, row.names = FALSE)
+message("Writing data to table 'participation'...")
+dbWriteTable(con, DBI::Id( schema=HISTORIC_SCHEMA, table="participation" ), pbp_df, overwrite = TRUE, row.names = FALSE)
 message("Successfully wrote data.")
 rm(pbp_df) # Clean up memory
 gc()       # Force garbage collection
 
-message("\n--- Processing Dictionary ---")
-message("Downloading PBP dictionary...")
-pbp_dict_df <- nflreadr::dictionary_rosters
-message(paste("Downloaded", nrow(pbp_dict_df), "dictionary entries."))
-message("Writing PBP dictionary to PostgreSQL table 'dictionary_rosters'...")
-dbWriteTable(con, "nfl_historic.dictionary_rosters", pbp_dict_df, overwrite = TRUE, row.names = FALSE)
-message("Successfully wrote dictionary.")
-rm(pbp_dict_df) # Clean up memory
-
-message("\n--- Processing Data ---")
-message("Downloading all historical Player Stats data...")
-pbp_df <- nflreadr::load_rosters_weekly(2002:2024)
+message("Downloading all historical Roster data...")
+pbp_df <- nflreadr::load_rosters(1999:last_historic_season)
 message(paste("Downloaded", nrow(pbp_df), "rows of data."))
-message("Writing PBP data to PostgreSQL table 'rosters_weekly'...")
-dbWriteTable(con, "nfl_historic.rosters_weekly", pbp_df, overwrite = TRUE, row.names = FALSE)
+message("Writing data to table 'rosters'...")
+dbWriteTable(con, DBI::Id( schema=HISTORIC_SCHEMA, table="rosters" ), pbp_df, overwrite = TRUE, row.names = FALSE)
 message("Successfully wrote data.")
 rm(pbp_df) # Clean up memory
 gc()       # Force garbage collection
 
-message("\n--- Processing Data ---")
-message("Downloading all historical Player Stats data...")
-pbp_df <- nflreadr::load_teams(1999:2024)
+message("Downloading all historical Roster Weekly data...")
+pbp_df <- nflreadr::load_rosters_weekly(2002:last_historic_season)
 message(paste("Downloaded", nrow(pbp_df), "rows of data."))
-message("Writing PBP data to PostgreSQL table 'teams'...")
-dbWriteTable(con, "nfl_historic.teams", pbp_df, overwrite = TRUE, row.names = FALSE)
+message("Writing data to table 'rosters_weekly'...")
+dbWriteTable(con, DBI::Id( schema=HISTORIC_SCHEMA, table="rosters_weekly" ), pbp_df, overwrite = TRUE, row.names = FALSE)
 message("Successfully wrote data.")
 rm(pbp_df) # Clean up memory
 gc()       # Force garbage collection
 
-message("\n--- Processing Data ---")
-message("Downloading all historical Player Stats data...")
-pbp_df <- nflreadr::load_schedules(1999:2024)
+message("Downloading all historical Team data...")
+pbp_df <- nflreadr::load_teams(1999:last_historic_season)
 message(paste("Downloaded", nrow(pbp_df), "rows of data."))
-message("Writing PBP data to PostgreSQL table 'schedules'...")
-dbWriteTable(con, "nfl_historic.schedules", pbp_df, overwrite = TRUE, row.names = FALSE)
+message("Writing data to table 'teams'...")
+dbWriteTable(con, DBI::Id( schema=HISTORIC_SCHEMA, table="teams" ), pbp_df, overwrite = TRUE, row.names = FALSE)
 message("Successfully wrote data.")
 rm(pbp_df) # Clean up memory
 gc()       # Force garbage collection
 
-message("\n--- Processing Dictionary ---")
-message("Downloading PBP dictionary...")
-pbp_dict_df <- nflreadr::dictionary_schedules
-message(paste("Downloaded", nrow(pbp_dict_df), "dictionary entries."))
-message("Writing PBP dictionary to PostgreSQL table 'dictionary_schedules'...")
-dbWriteTable(con, "nfl_historic.dictionary_schedules", pbp_dict_df, overwrite = TRUE, row.names = FALSE)
-message("Successfully wrote dictionary.")
-rm(pbp_dict_df) # Clean up memory
-
-message("\n--- Processing Data ---")
-message("Downloading all historical Player Stats data...")
-pbp_df <- nflreadr::load_officials(2015:2024)
+message("Downloading all historical Schedule data...")
+pbp_df <- nflreadr::load_schedules(1999:last_historic_season)
 message(paste("Downloaded", nrow(pbp_df), "rows of data."))
-message("Writing PBP data to PostgreSQL table 'officials'...")
-dbWriteTable(con, "nfl_historic.officials", pbp_df, overwrite = TRUE, row.names = FALSE)
+message("Writing data to table 'schedules'...")
+dbWriteTable(con, DBI::Id( schema=HISTORIC_SCHEMA, table="schedules" ), pbp_df, overwrite = TRUE, row.names = FALSE)
 message("Successfully wrote data.")
 rm(pbp_df) # Clean up memory
 gc()       # Force garbage collection
 
-message("\n--- Processing Data ---")
-message("Downloading all historical Player Stats data...")
-pbp_df <- nflreadr::load_trades(1999:2024)
+message("Downloading all historical Official data...")
+pbp_df <- nflreadr::load_officials(2015:last_historic_season)
 message(paste("Downloaded", nrow(pbp_df), "rows of data."))
-message("Writing PBP data to PostgreSQL table 'trades'...")
-dbWriteTable(con, "nfl_historic.trades", pbp_df, overwrite = TRUE, row.names = FALSE)
+message("Writing data to table 'officials'...")
+dbWriteTable(con, DBI::Id( schema=HISTORIC_SCHEMA, table="officials" ), pbp_df, overwrite = TRUE, row.names = FALSE)
 message("Successfully wrote data.")
 rm(pbp_df) # Clean up memory
 gc()       # Force garbage collection
 
-message("\n--- Processing Dictionary ---")
-message("Downloading PBP dictionary...")
-pbp_dict_df <- nflreadr::dictionary_trades
-message(paste("Downloaded", nrow(pbp_dict_df), "dictionary entries."))
-message("Writing PBP dictionary to PostgreSQL table 'dictionary_trades'...")
-dbWriteTable(con, "nfl_historic.dictionary_trades", pbp_dict_df, overwrite = TRUE, row.names = FALSE)
-message("Successfully wrote dictionary.")
-rm(pbp_dict_df) # Clean up memory
-
-message("\n--- Processing Data ---")
-message("Downloading all historical Player Stats data...")
-pbp_df <- nflreadr::load_draft_picks(1999:2024)
+message("Downloading all historical Trades data...")
+pbp_df <- nflreadr::load_trades(1999:last_historic_season)
 message(paste("Downloaded", nrow(pbp_df), "rows of data."))
-message("Writing PBP data to PostgreSQL table 'draft_picks'...")
-dbWriteTable(con, "nfl_historic.draft_picks", pbp_df, overwrite = TRUE, row.names = FALSE)
+message("Writing data to table 'trades'...")
+dbWriteTable(con, DBI::Id( schema=HISTORIC_SCHEMA, table="trades" ), pbp_df, overwrite = TRUE, row.names = FALSE)
 message("Successfully wrote data.")
 rm(pbp_df) # Clean up memory
 gc()       # Force garbage collection
 
-message("\n--- Processing Dictionary ---")
-message("Downloading PBP dictionary...")
-pbp_dict_df <- nflreadr::dictionary_draft_picks
-message(paste("Downloaded", nrow(pbp_dict_df), "dictionary entries."))
-message("Writing PBP dictionary to PostgreSQL table 'dictionary_draft_picks'...")
-dbWriteTable(con, "nfl_historic.dictionary_draft_picks", pbp_dict_df, overwrite = TRUE, row.names = FALSE)
-message("Successfully wrote dictionary.")
-rm(pbp_dict_df) # Clean up memory
-
-message("\n--- Processing Data ---")
-message("Downloading all historical Player Stats data...")
-pbp_df <- nflreadr::load_combine(1999:2024)
+message("Downloading all historical Draft Picks data...")
+pbp_df <- nflreadr::load_draft_picks(1999:last_historic_season)
 message(paste("Downloaded", nrow(pbp_df), "rows of data."))
-message("Writing PBP data to PostgreSQL table 'combine'...")
-dbWriteTable(con, "cnfl_historic.ombine", pbp_df, overwrite = TRUE, row.names = FALSE)
+message("Writing data to table 'draft_picks'...")
+dbWriteTable(con, DBI::Id( schema=HISTORIC_SCHEMA, table="draft_picks" ), pbp_df, overwrite = TRUE, row.names = FALSE)
 message("Successfully wrote data.")
 rm(pbp_df) # Clean up memory
 gc()       # Force garbage collection
 
-message("\n--- Processing Dictionary ---")
-message("Downloading PBP dictionary...")
-pbp_dict_df <- nflreadr::dictionary_combine
-message(paste("Downloaded", nrow(pbp_dict_df), "dictionary entries."))
-message("Writing PBP dictionary to PostgreSQL table 'dictionary_combine'...")
-dbWriteTable(con, "nfl_historic.dictionary_combine", pbp_dict_df, overwrite = TRUE, row.names = FALSE)
-message("Successfully wrote dictionary.")
-rm(pbp_dict_df) # Clean up memory
-
-message("\n--- Processing Data ---")
-message("Downloading all historical Player Stats data...")
-pbp_df <- nflreadr::load_nextgen_stats(2016:2024)
+message("Downloading all historical Combine data...")
+pbp_df <- nflreadr::load_combine(1999:last_historic_season)
 message(paste("Downloaded", nrow(pbp_df), "rows of data."))
-message("Writing PBP data to PostgreSQL table 'nextgen_stats'...")
-dbWriteTable(con, "nfl_historic.nextgen_stats", pbp_df, overwrite = TRUE, row.names = FALSE)
+message("Writing data to table 'combine'...")
+dbWriteTable(con, DBI::Id( schema=HISTORIC_SCHEMA, table="combine" ), pbp_df, overwrite = TRUE, row.names = FALSE)
 message("Successfully wrote data.")
 rm(pbp_df) # Clean up memory
 gc()       # Force garbage collection
 
-message("\n--- Processing Dictionary ---")
-message("Downloading PBP dictionary...")
-pbp_dict_df <- nflreadr::dictionary_nextgen_stats
-message(paste("Downloaded", nrow(pbp_dict_df), "dictionary entries."))
-message("Writing PBP dictionary to PostgreSQL table 'dictionary_nextgen_stats'...")
-dbWriteTable(con, "nfl_historic.dictionary_nextgen_stats", pbp_dict_df, overwrite = TRUE, row.names = FALSE)
-message("Successfully wrote dictionary.")
-rm(pbp_dict_df) # Clean up memory
-
-message("\n--- Processing Data ---")
-message("Downloading all historical Player Stats data...")
-pbp_df <- nflreadr::load_depth_charts(2001:2024)
+message("Downloading all historical Nextgen Stats data...")
+pbp_df <- nflreadr::load_nextgen_stats(2016:last_historic_season)
 message(paste("Downloaded", nrow(pbp_df), "rows of data."))
-message("Writing PBP data to PostgreSQL table 'depth_charts'...")
-dbWriteTable(con, "nfl_historic.depth_charts", pbp_df, overwrite = TRUE, row.names = FALSE)
+message("Writing data to table 'nextgen_stats'...")
+dbWriteTable(con, DBI::Id( schema=HISTORIC_SCHEMA, table="nextgen_stats" ), pbp_df, overwrite = TRUE, row.names = FALSE)
 message("Successfully wrote data.")
 rm(pbp_df) # Clean up memory
 gc()       # Force garbage collection
 
-message("\n--- Processing Dictionary ---")
-message("Downloading PBP dictionary...")
-pbp_dict_df <- nflreadr::dictionary_depth_charts
-message(paste("Downloaded", nrow(pbp_dict_df), "dictionary entries."))
-message("Writing PBP dictionary to PostgreSQL table 'dictionary_depth_charts'...")
-dbWriteTable(con, "nfl_historic.dictionary_depth_charts", pbp_dict_df, overwrite = TRUE, row.names = FALSE)
-message("Successfully wrote dictionary.")
-rm(pbp_dict_df) # Clean up memory
-
-message("\n--- Processing Data ---")
-message("Downloading all historical Player Stats data...")
-pbp_df <- nflreadr::load_injuries(2009:2024)
+message("Downloading all historical Depth Chart data...")
+pbp_df <- nflreadr::load_depth_charts(2001:last_historic_season)
 message(paste("Downloaded", nrow(pbp_df), "rows of data."))
-message("Writing PBP data to PostgreSQL table 'injuries'...")
-dbWriteTable(con, "nfl_historic.injuries", pbp_df, overwrite = TRUE, row.names = FALSE)
+message("Writing data to table 'depth_charts'...")
+dbWriteTable(con, DBI::Id( schema=HISTORIC_SCHEMA, table="depth_charts" ), pbp_df, overwrite = TRUE, row.names = FALSE)
 message("Successfully wrote data.")
 rm(pbp_df) # Clean up memory
 gc()       # Force garbage collection
 
-message("\n--- Processing Dictionary ---")
-message("Downloading PBP dictionary...")
-pbp_dict_df <- nflreadr::dictionary_injuries
-message(paste("Downloaded", nrow(pbp_dict_df), "dictionary entries."))
-message("Writing PBP dictionary to PostgreSQL table 'dictionary_injuries'...")
-dbWriteTable(con, "nfl_historic.dictionary_injuries", pbp_dict_df, overwrite = TRUE, row.names = FALSE)
-message("Successfully wrote dictionary.")
-rm(pbp_dict_df) # Clean up memory
-
-message("\n--- Processing Data ---")
-message("Downloading all historical Player Stats data...")
-pbp_df <- nflreadr::load_espn_qbr(2006:2024)
+message("Downloading all historical Injuries data...")
+pbp_df <- nflreadr::load_injuries(2009:last_historic_season)
 message(paste("Downloaded", nrow(pbp_df), "rows of data."))
-message("Writing PBP data to PostgreSQL table 'espn_qbr'...")
-dbWriteTable(con, "nfl_historic.espn_qbr", pbp_df, overwrite = TRUE, row.names = FALSE)
+message("Writing data to table 'injuries'...")
+dbWriteTable(con, DBI::Id( schema=HISTORIC_SCHEMA, table="injuries" ), pbp_df, overwrite = TRUE, row.names = FALSE)
 message("Successfully wrote data.")
 rm(pbp_df) # Clean up memory
 gc()       # Force garbage collection
 
-message("\n--- Processing Dictionary ---")
-message("Downloading PBP dictionary...")
-pbp_dict_df <- nflreadr::dictionary_espn_qbr
-message(paste("Downloaded", nrow(pbp_dict_df), "dictionary entries."))
-message("Writing PBP dictionary to PostgreSQL table 'dictionary_espn_qbr'...")
-dbWriteTable(con, "nfl_historic.dictionary_espn_qbr", pbp_dict_df, overwrite = TRUE, row.names = FALSE)
-message("Successfully wrote dictionary.")
-rm(pbp_dict_df) # Clean up memory
-
-message("\n--- Processing Data ---")
-message("Downloading all historical Player Stats data...")
-pbp_df <- nflreadr::load_pfr_advstats(2018:2024)
+message("Downloading all historical ESPN Qbr data...")
+pbp_df <- nflreadr::load_espn_qbr(2006:last_historic_season)
 message(paste("Downloaded", nrow(pbp_df), "rows of data."))
-message("Writing PBP data to PostgreSQL table 'pfr_advstats'...")
-dbWriteTable(con, "nfl_historic.pfr_adv_stats", pbp_df, overwrite = TRUE, row.names = FALSE)
+message("Writing data to table 'espn_qbr'...")
+dbWriteTable(con, DBI::Id( schema=HISTORIC_SCHEMA, table="espn_qbr" ), pbp_df, overwrite = TRUE, row.names = FALSE)
 message("Successfully wrote data.")
 rm(pbp_df) # Clean up memory
 gc()       # Force garbage collection
 
-message("\n--- Processing Dictionary ---")
-message("Downloading PBP dictionary...")
-pbp_dict_df <- nflreadr::dictionary_pfr_passing
-message(paste("Downloaded", nrow(pbp_dict_df), "dictionary entries."))
-message("Writing PBP dictionary to PostgreSQL table 'dictionary_pfr_passing'...")
-dbWriteTable(con, "nfl_historic.dictionary_pfr_passing", pbp_dict_df, overwrite = TRUE, row.names = FALSE)
-message("Successfully wrote dictionary.")
-rm(pbp_dict_df) # Clean up memory
-
-message("\n--- Processing Data ---")
-message("Downloading all historical Player Stats data...")
-pbp_df <- nflreadr::load_snap_counts(2012:2024)
+message("Downloading all historical Pfr Adv Stats data...")
+pbp_df <- nflreadr::load_pfr_advstats(2018:last_historic_season)
 message(paste("Downloaded", nrow(pbp_df), "rows of data."))
-message("Writing PBP data to PostgreSQL table 'snapcounts'...")
-dbWriteTable(con, "nfl_historic.snap_counts", pbp_df, overwrite = TRUE, row.names = FALSE)
+message("Writing data to table 'pfr_advstats'...")
+dbWriteTable(con, DBI::Id( schema=HISTORIC_SCHEMA, table="pfr_adv_stats" ), pbp_df, overwrite = TRUE, row.names = FALSE)
 message("Successfully wrote data.")
 rm(pbp_df) # Clean up memory
 gc()       # Force garbage collection
 
-message("\n--- Processing Dictionary ---")
-message("Downloading PBP dictionary...")
-pbp_dict_df <- nflreadr::dictionary_snap_counts
-message(paste("Downloaded", nrow(pbp_dict_df), "dictionary entries."))
-message("Writing PBP dictionary to PostgreSQL table 'dictionary_snap_counts'...")
-dbWriteTable(con, "nfl_historic.dictionary_snap_counts", pbp_dict_df, overwrite = TRUE, row.names = FALSE)
-message("Successfully wrote dictionary.")
-rm(pbp_dict_df) # Clean up memory
+message("Downloading all historical Snap Count data...")
+pbp_df <- nflreadr::load_snap_counts(2012:last_historic_season)
+message(paste("Downloaded", nrow(pbp_df), "rows of data."))
+message("Writing data to table 'snapcounts'...")
+dbWriteTable(con, DBI::Id( schema=HISTORIC_SCHEMA, table="snap_counts" ), pbp_df, overwrite = TRUE, row.names = FALSE)
+message("Successfully wrote data.")
+rm(pbp_df) # Clean up memory
+gc()       # Force garbage collection
 
-message("\n--- Processing Data ---")
-message("Downloading all historical Player Stats data...")
+message("Downloading all historical Contracts data...")
 pbp_df <- nflreadr::load_contracts()
 message(paste("Downloaded", nrow(pbp_df), "rows of data."))
-message("Writing PBP data to PostgreSQL table 'contracts'...")
+message("Writing data to table 'contracts'...")
 # --- FLATTEN THE DATA ---
 # Use tidyr::unnest() to expand the nested 'cols' column
 message("Flattening the nested 'cols' column...")
@@ -350,20 +201,10 @@ contracts_flat_df <- tidyr::unnest(pbp_df, cols = c(cols), names_sep = "_")
 message(paste("Data flattened to", nrow(contracts_flat_df), "rows."))
 
 message("Writing flattened contracts data to PostgreSQL table 'contracts'...")
-dbWriteTable(con, "contracts", contracts_flat_df, overwrite = TRUE, row.names = FALSE)
-message("Successfully wrote contracts data.")
+dbWriteTable(con, DBI::Id( schema=HISTORIC_SCHEMA, table="contracts" ), contracts_flat_df, overwrite = TRUE, row.names = FALSE)
+message("Successfully wrote data.")
 rm(pbp_df, contracts_flat_df) # Clean up memory for both data frames
 gc()       # Force garbage collection
-
-message("\n--- Processing Dictionary ---")
-message("Downloading PBP dictionary...")
-pbp_dict_df <- nflreadr::dictionary_contracts
-message(paste("Downloaded", nrow(pbp_dict_df), "dictionary entries."))
-message("Writing PBP dictionary to PostgreSQL table 'dictionary_contracts'...")
-dbWriteTable(con, "nfl_historic.dictionary_contracts", pbp_dict_df, overwrite = TRUE, row.names = FALSE)
-message("Successfully wrote dictionary.")
-rm(pbp_dict_df) # Clean up memory
-
 
 # --- Final Step: Disconnect from PostgreSQL ---
 dbDisconnect(con)

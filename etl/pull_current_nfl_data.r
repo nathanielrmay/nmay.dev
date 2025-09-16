@@ -13,6 +13,7 @@ PG_PASSWORD <- "Eattherich3537!"
 
 # --- Define Seasons ---
 cy <- 2025
+CURRENT_SCHEMA <- "nfl_current"
 
 # --- Connect to PostgreSQL ---
 message("Connecting to PostgreSQL database...")
@@ -24,29 +25,32 @@ con <- dbConnect(RPostgres::Postgres(),
                  password = PG_PASSWORD)
 message("Connection successful.")
 
-message("\n--- Processing Play-by-Play Data ---")
+message(paste("Ensuring schema '", HISTORIC_SCHEMA, "' exists..."))
+dbExecute(con, paste("CREATE SCHEMA IF NOT EXISTS", HISTORIC_SCHEMA))
+
+message("Downloading all play-by-play data...")
 pbp_df <- nflreadr::load_pbp(cy)
 message(paste("Downloaded", nrow(pbp_df), "rows of PBP data."))
-message("Writing PBP data to PostgreSQL table 'play_by_play'...")
-dbWriteTable(con, "nfl_current.play_by_play", pbp_df, overwrite = TRUE, row.names = FALSE)
-message("Successfully wrote PBP data.")
+message("Writing data to table 'play_by_play'...")
+dbWriteTable(con, DBI::Id( schema=CURRENT_SCHEMA, table="play_by_play" ), pbp_df, overwrite = TRUE, row.names = FALSE)
+message("Successfully wrote data.")
 rm(pbp_df) # Clean up memory
 gc()       # Force garbage collection
 
-message("\n--- Processing Player Stats Data ---")
+message("Downloading Player Stats Data ---")
 pbp_df <- nflreadr::load_player_stats(cy)
 message(paste("Downloaded", nrow(pbp_df), "rows of PBP data."))
-message("Writing PBP data to PostgreSQL table 'player_stats'...")
-dbWriteTable(con, "nfl_current.player_stats", pbp_df, overwrite = TRUE, row.names = FALSE)
-message("Successfully wrote PBP data.")
+message("Writing data to table 'player_stats'...")
+dbWriteTable(con, DBI::Id( schema=CURRENT_SCHEMA, table="player_stats" ), pbp_df, overwrite = TRUE, row.names = FALSE)
+message("Successfully wrote data.")
 rm(pbp_df) # Clean up memory
 gc()       # Force garbage collection
 
-message("\n--- Processing Team Stats Data ---")
+message("Downloading Team Stats Data ---")
 pbp_df <- nflreadr::load_team_stats(cy)
 message(paste("Downloaded", nrow(pbp_df), "rows of data."))
-message("Writing PBP data to PostgreSQL table 'team_stats'...")
-dbWriteTable(con, "nfl_current.team_stats", pbp_df, overwrite = TRUE, row.names = FALSE)
+message("Writing data to table 'team_stats'...")
+dbWriteTable(con, DBI::Id( schema=CURRENT_SCHEMA, table="team_stats" ), pbp_df, overwrite = TRUE, row.names = FALSE)
 message("Successfully wrote data.")
 rm(pbp_df) # Clean up memory
 gc()       # Force garbage collection
@@ -54,17 +58,17 @@ gc()       # Force garbage collection
 message("Downloading Participation data...")
 pbp_df <- nflreadr::load_participation(cy)
 message(paste("Downloaded", nrow(pbp_df), "rows of data."))
-message("Writing PBP data to PostgreSQL table 'participation'...")
-dbWriteTable(con, "nfl_current.participation", pbp_df, overwrite = TRUE, row.names = FALSE)
+message("Writing data to table 'participation'...")
+dbWriteTable(con, DBI::Id( schema=CURRENT_SCHEMA, table="participation" ), pbp_df, overwrite = TRUE, row.names = FALSE)
 message("Successfully wrote data.")
 rm(pbp_df) # Clean up memory
 gc()       # Force garbage collection
 
-message("\n--- Processing Roster Data ---")
+message("Downloading Roster Data ---")
 pbp_df <- nflreadr::load_rosters(cy)
 message(paste("Downloaded", nrow(pbp_df), "rows of data."))
-message("Writing PBP data to PostgreSQL table 'rosters'...")
-dbWriteTable(con, "nfl_current.rosters", pbp_df, overwrite = TRUE, row.names = FALSE)
+message("Writing data to table 'rosters'...")
+dbWriteTable(con, DBI::Id( schema=CURRENT_SCHEMA, table="rosters" ), pbp_df, overwrite = TRUE, row.names = FALSE)
 message("Successfully wrote data.")
 rm(pbp_df) # Clean up memory
 gc()       # Force garbage collection
@@ -72,8 +76,8 @@ gc()       # Force garbage collection
 message("Downloading Weekly Roster data...")
 pbp_df <- nflreadr::load_rosters_weekly(cy)
 message(paste("Downloaded", nrow(pbp_df), "rows of data."))
-message("Writing PBP data to PostgreSQL table 'rosters_weekly'...")
-dbWriteTable(con, "nfl_current.rosters_weekly", pbp_df, overwrite = TRUE, row.names = FALSE)
+message("Writing data to table 'rosters_weekly'...")
+dbWriteTable(con, DBI::Id( schema=CURRENT_SCHEMA, table="rosters_weekly" ), pbp_df, overwrite = TRUE, row.names = FALSE)
 message("Successfully wrote data.")
 rm(pbp_df) # Clean up memory
 gc()       # Force garbage collection
@@ -81,8 +85,8 @@ gc()       # Force garbage collection
 message("Downloading Team data...")
 pbp_df <- nflreadr::load_teams(cy)
 message(paste("Downloaded", nrow(pbp_df), "rows of data."))
-message("Writing PBP data to PostgreSQL table 'teams'...")
-dbWriteTable(con, "nfl_current.teams", pbp_df, overwrite = TRUE, row.names = FALSE)
+message("Writing data to table 'teams'...")
+dbWriteTable(con, DBI::Id( schema=CURRENT_SCHEMA, table="teams" ), pbp_df, overwrite = TRUE, row.names = FALSE)
 message("Successfully wrote data.")
 rm(pbp_df) # Clean up memory
 gc()       # Force garbage collection
@@ -90,8 +94,8 @@ gc()       # Force garbage collection
 message("Downloading Schedule data...")
 pbp_df <- nflreadr::load_schedules(cy)
 message(paste("Downloaded", nrow(pbp_df), "rows of data."))
-message("Writing PBP data to PostgreSQL table 'schedules'...")
-dbWriteTable(con, "nfl_current.schedules", pbp_df, overwrite = TRUE, row.names = FALSE)
+message("Writing data to table 'schedules'...")
+dbWriteTable(con, DBI::Id( schema=CURRENT_SCHEMA, table="schedules" ), pbp_df, overwrite = TRUE, row.names = FALSE)
 message("Successfully wrote data.")
 rm(pbp_df) # Clean up memory
 gc()       # Force garbage collection
@@ -99,8 +103,8 @@ gc()       # Force garbage collection
 message("Downloading Officials data...")
 pbp_df <- nflreadr::load_officials(cy)
 message(paste("Downloaded", nrow(pbp_df), "rows of data."))
-message("Writing PBP data to PostgreSQL table 'officials'...")
-dbWriteTable(con, "nfl_current.officials", pbp_df, overwrite = TRUE, row.names = FALSE)
+message("Writing data to table 'officials'...")
+dbWriteTable(con, DBI::Id( schema=CURRENT_SCHEMA, table="officials" ), pbp_df, overwrite = TRUE, row.names = FALSE)
 message("Successfully wrote data.")
 rm(pbp_df) # Clean up memory
 gc()       # Force garbage collection
@@ -108,8 +112,8 @@ gc()       # Force garbage collection
 message("Downloading Trade data...")
 pbp_df <- nflreadr::load_trades(cy)
 message(paste("Downloaded", nrow(pbp_df), "rows of data."))
-message("Writing PBP data to PostgreSQL table 'trades'...")
-dbWriteTable(con, "nfl_current.trades", pbp_df, overwrite = TRUE, row.names = FALSE)
+message("Writing data to table 'trades'...")
+dbWriteTable(con, DBI::Id( schema=CURRENT_SCHEMA, table="trades" ), pbp_df, overwrite = TRUE, row.names = FALSE)
 message("Successfully wrote data.")
 rm(pbp_df) # Clean up memory
 gc()       # Force garbage collection
@@ -117,8 +121,8 @@ gc()       # Force garbage collection
 message("Downloading Draft Picks data...")
 pbp_df <- nflreadr::load_draft_picks(cy)
 message(paste("Downloaded", nrow(pbp_df), "rows of data."))
-message("Writing PBP data to PostgreSQL table 'draft_picks'...")
-dbWriteTable(con, "nfl_current.draft_picks", pbp_df, overwrite = TRUE, row.names = FALSE)
+message("Writing data to table 'draft_picks'...")
+dbWriteTable(con, DBI::Id( schema=CURRENT_SCHEMA, table="draft_picks" ), pbp_df, overwrite = TRUE, row.names = FALSE)
 message("Successfully wrote data.")
 rm(pbp_df) # Clean up memory
 gc()       # Force garbage collection
@@ -126,8 +130,8 @@ gc()       # Force garbage collection
 message("Downloading Combine data...")
 pbp_df <- nflreadr::load_combine(cy)
 message(paste("Downloaded", nrow(pbp_df), "rows of data."))
-message("Writing PBP data to PostgreSQL table 'combine'...")
-dbWriteTable(con, "nfl_current.combine", pbp_df, overwrite = TRUE, row.names = FALSE)
+message("Writing data to table 'combine'...")
+dbWriteTable(con, DBI::Id( schema=CURRENT_SCHEMA, table="combine" ), pbp_df, overwrite = TRUE, row.names = FALSE)
 message("Successfully wrote data.")
 rm(pbp_df) # Clean up memory
 gc()       # Force garbage collection
@@ -135,8 +139,8 @@ gc()       # Force garbage collection
 message("Downloading Nextgen Stats data...")
 pbp_df <- nflreadr::load_nextgen_stats(cy)
 message(paste("Downloaded", nrow(pbp_df), "rows of data."))
-message("Writing PBP data to PostgreSQL table 'nextgen_stats'...")
-dbWriteTable(con, "nfl_current.nextgen_stats", pbp_df, overwrite = TRUE, row.names = FALSE)
+message("Writing data to table 'nextgen_stats'...")
+dbWriteTable(con, DBI::Id( schema=CURRENT_SCHEMA, table="nextgen_stats" ), pbp_df, overwrite = TRUE, row.names = FALSE)
 message("Successfully wrote data.")
 rm(pbp_df) # Clean up memory
 gc()       # Force garbage collection
@@ -144,8 +148,8 @@ gc()       # Force garbage collection
 message("Downloading Depth Charts data...")
 pbp_df <- nflreadr::load_depth_charts(cy)
 message(paste("Downloaded", nrow(pbp_df), "rows of data."))
-message("Writing PBP data to PostgreSQL table 'depth_charts'...")
-dbWriteTable(con, "nfl_current.depth_charts", pbp_df, overwrite = TRUE, row.names = FALSE)
+message("Writing data to table 'depth_charts'...")
+dbWriteTable(con, DBI::Id( schema=CURRENT_SCHEMA, table="depth_charts" ), pbp_df, overwrite = TRUE, row.names = FALSE)
 message("Successfully wrote data.")
 rm(pbp_df) # Clean up memory
 gc()       # Force garbage collection
@@ -153,8 +157,8 @@ gc()       # Force garbage collection
 message("Downloading Injuries data...")
 pbp_df <- nflreadr::load_injuries(cy)
 message(paste("Downloaded", nrow(pbp_df), "rows of data."))
-message("Writing PBP data to PostgreSQL table 'injuries'...")
-dbWriteTable(con, "nfl_current.injuries", pbp_df, overwrite = TRUE, row.names = FALSE)
+message("Writing data to table 'injuries'...")
+dbWriteTable(con, DBI::Id( schema=CURRENT_SCHEMA, table="injuries" ), pbp_df, overwrite = TRUE, row.names = FALSE)
 message("Successfully wrote data.")
 rm(pbp_df) # Clean up memory
 gc()       # Force garbage collection
@@ -162,8 +166,8 @@ gc()       # Force garbage collection
 message("Downloading Espn QBR data...")
 pbp_df <- nflreadr::load_espn_qbr(cy)
 message(paste("Downloaded", nrow(pbp_df), "rows of data."))
-message("Writing PBP data to PostgreSQL table 'espn_qbr'...")
-dbWriteTable(con, "nfl_current.espn_qbr", pbp_df, overwrite = TRUE, row.names = FALSE)
+message("Writing data to table 'espn_qbr'...")
+dbWriteTable(con, DBI::Id( schema=CURRENT_SCHEMA, table="espn_qbr" ), pbp_df, overwrite = TRUE, row.names = FALSE)
 message("Successfully wrote data.")
 rm(pbp_df) # Clean up memory
 gc()       # Force garbage collection
@@ -171,8 +175,8 @@ gc()       # Force garbage collection
 message("Downloading PFR Adv Stats data...")
 pbp_df <- nflreadr::load_pfr_advstats(cy)
 message(paste("Downloaded", nrow(pbp_df), "rows of data."))
-message("Writing PBP data to PostgreSQL table 'pfr_adv_stats'...")
-dbWriteTable(con, "nfl_current.pfr_adv_stats", pbp_df, overwrite = TRUE, row.names = FALSE)
+message("Writing data to table 'pfr_advstats'...")
+dbWriteTable(con, DBI::Id( schema=CURRENT_SCHEMA, table="pfr_adv_stats" ), pbp_df, overwrite = TRUE, row.names = FALSE)
 message("Successfully wrote data.")
 rm(pbp_df) # Clean up memory
 gc()       # Force garbage collection
@@ -180,8 +184,8 @@ gc()       # Force garbage collection
 message("Downloading Snap Counts data...")
 pbp_df <- nflreadr::load_snap_counts(cy)
 message(paste("Downloaded", nrow(pbp_df), "rows of data."))
-message("Writing PBP data to PostgreSQL table 'snap_counts'...")
-dbWriteTable(con, "nfl_current.snap_counts", pbp_df, overwrite = TRUE, row.names = FALSE)
+message("Writing data to table 'snapcounts'...")
+dbWriteTable(con, DBI::Id( schema=CURRENT_SCHEMA, table="snap_counts" ), pbp_df, overwrite = TRUE, row.names = FALSE)
 message("Successfully wrote data.")
 rm(pbp_df) # Clean up memory
 gc()       # Force garbage collection
@@ -197,7 +201,7 @@ contracts_flat_df <- tidyr::unnest(pbp_df, cols = c(cols), names_sep = "_")
 message(paste("Data flattened to", nrow(contracts_flat_df), "rows."))
 
 message("Writing flattened contracts data to PostgreSQL table 'contracts'...")
-dbWriteTable(con, "nfl_current.contracts", contracts_flat_df, overwrite = TRUE, row.names = FALSE)
+dbWriteTable(con, DBI::Id( schema=CURRENT_SCHEMA, table="contracts" ), contracts_flat_df, overwrite = TRUE, row.names = FALSE)
 message("Successfully wrote contracts data.")
 rm(pbp_df, contracts_flat_df) # Clean up memory for both data frames
 gc()       # Force garbage collection
