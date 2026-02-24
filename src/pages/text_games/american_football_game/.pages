@@ -1,0 +1,9 @@
+nav:
+    - Home: index.md
+    - vision.md
+    - inspirations.md
+    - features.md
+    - roadmap
+    - glossary.md
+    - notes
+    - Technical Documents: technical

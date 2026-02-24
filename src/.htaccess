@@ -1,0 +1,23 @@
+# .htaccess - front controller routing for Apache
+# Place this file in the webroot (src/) to route requests to index.php
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /
+
+    # Rule 1: Allow requests for the /pages directory to be served directly.
+    # This takes precedence over all other rules.
+    # RewriteRule ^pages/ - [L]
+
+    # Rule 2: Serve common asset files directly if they exist on the server.
+    # This prevents routing for images, CSS, JS, etc., through the front controller.
+    RewriteCond %{REQUEST_FILENAME} -f
+    RewriteCond %{REQUEST_FILENAME} \.(jpg|jpeg|png|gif|svg|css|js|ico|webp|woff|woff2|ttf|eot)$ [NC]
+    RewriteRule ^ - [L]
+
+    # Rule 3: Route all other requests to the front controller (index.php).
+    # This includes non-existent paths and existing .php/.html files
+    # that were not caught by the rules above.
+    # The condition prevents an infinite loop for index.php itself.
+    RewriteCond %{REQUEST_URI} !^/index\.php$
+    RewriteRule ^ index.php [L,QSA]
+</IfModule>

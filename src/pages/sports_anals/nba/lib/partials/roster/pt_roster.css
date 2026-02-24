@@ -1,0 +1,25 @@
+.roster-container { font-family: 'Roboto', sans-serif; width: 100%; margin: 0; padding: 0; }
+.roster-container .section-header {
+    font-family: 'Playfair Display', serif; font-weight: 700; font-size: 0.95rem;
+    border-bottom: 2px solid #2b2b2b; margin-top: 10px; margin-bottom: 2px; padding: 1px 5px;
+    text-transform: uppercase; cursor: pointer; list-style: none;
+}
+.roster-container .section-header::-webkit-details-marker { display: none; }
+.roster-container .section-header::after { content: '+'; float: right; font-weight: bold; }
+.roster-container details[open] .section-header::after { content: '-'; }
+
+.compact-roster { width: 100%; border-collapse: collapse; font-size: 0.7rem; line-height: 1.2; margin: 0; }
+.compact-roster th { 
+    text-align: left; font-size: 0.6rem; color: #666; text-transform: uppercase; 
+    padding: 2px 4px; border-bottom: 1px solid #ccc; 
+}
+.compact-roster td { padding: 2px 4px; border-bottom: 1px dotted #ccc; }
+
+.compact-roster .num-col { width: 5%; text-align: center; font-family: 'Roboto Mono', monospace; }
+.compact-roster .name-col { width: 25%; }
+.compact-roster .pos-col { width: 6%; text-align: center; }
+.compact-roster .height-col { width: 8%; text-align: center; }
+.compact-roster .weight-col { width: 8%; text-align: center; }
+.compact-roster .age-col { width: 6%; text-align: center; }
+.compact-roster .exp-col { width: 6%; text-align: center; }
+.compact-roster .school-col { width: 36%; }

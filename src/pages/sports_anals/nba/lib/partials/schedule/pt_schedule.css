@@ -1,0 +1,24 @@
+.schedule tbody {
+    font-size: 0.85rem; !important;
+}
+
+.schedule table {
+    width: 100%;
+    border: none;
+}
+
+.schedule th {
+    border: none;
+    border-bottom: solid;
+    padding: 2px;
+}
+
+.schedule td {
+    border: none;
+    padding: 2px 20px 2px 2px;
+}
+
+.schedule a {
+    color: #111111;
+    text-decoration: none;
+}
