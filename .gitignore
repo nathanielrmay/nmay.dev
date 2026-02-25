@@ -7,7 +7,6 @@
 # Allow src and docs folders
 !src/
 !docs/
-!.antigravity/
 
 # Specifically ignore the database config
 src/db_config.php
