@@ -8,7 +8,7 @@ use lib\db\models\wrv\db_idc_war;
 use lib\db\models\wrv\db_idc_war_places_place;
 use lib\db\models\wrv\db_idc_war_vote;
 
-class pg_vote extends aIdcWarPage {
+class pg_idc_wars_vote extends aIdcWarPage {
     public function getPageTitle() {
         return "I Don't Care Wars - Vote";
     }
@@ -93,7 +93,7 @@ if (empty($entries)) {
     <?php endif; ?>
 
     <?php if (!$success): ?>
-        <form method="POST" action="/wrv/food/idc_war/pg_vote.php?war=<?= htmlspecialchars($warPk) ?>" id="vote-form">
+        <form method="POST" action="/wrv/food/idc_war/pg_idc_wars_vote.php?war=<?= htmlspecialchars($warPk) ?>" id="vote-form">
             <input type="hidden" name="war_pk" value="<?= htmlspecialchars($warPk) ?>">
             <input type="hidden" name="rankings_json" id="rankings-json" value="">
 
