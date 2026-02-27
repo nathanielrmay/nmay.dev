@@ -4,9 +4,9 @@
         &#9776;
     </button>
     <a href="https://nmay.dev">nmay.dev</a>
-    <span class="sep">|</span>
-    <a href="/wrv/food/pg_index.php">Food</a>
-    <span class="sep">|</span>
+<!--    <span class="sep">|</span>-->
+<!--    <a href="/wrv/food/pg_index.php">Food</a>-->
+<!--    <span class="sep">|</span>-->
     <span style="margin-left: auto; font-size: 0.8em; align-self: center;">
         <span style="margin-left: auto; font-size: 0.65em; align-self: center;">today is </span>
         <span id="local-date"></span>
