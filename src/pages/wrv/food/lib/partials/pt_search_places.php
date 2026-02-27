@@ -6,6 +6,18 @@
     <?php endif; ?>
 
     <?php $canAddRestaurants = $canAddRestaurants ?? true; ?>
+
+    <!-- Roster managed by JS (above search so it stays visible) -->
+    <?php $hasRoster = !empty($showRoster); ?>
+    <?php if ($hasRoster): ?>
+    <div style="margin-bottom: 20px; padding-bottom: 20px; border-bottom: 2px solid #ddd;">
+        <h3>Current Roster (<span id="roster-count">0</span>)</h3>
+        <div id="roster-list">
+            <p style="color: #999; font-style: italic;">No restaurants added yet.</p>
+        </div>
+    </div>
+    <?php endif; ?>
+
     <?php if ($canAddRestaurants): ?>
         <!-- Search Form (AJAX, no page reload) -->
         <form id="places-search-form" style="margin-bottom: 30px; display: flex; gap: 10px;">
@@ -24,17 +36,6 @@
         <div id="search-results"></div>
     <?php else: ?>
         <p style="color: #666; font-style: italic; margin-bottom: 20px;">Restaurants can only be added when the war is in "creation" status.</p>
-    <?php endif; ?>
-
-    <!-- Roster managed by JS -->
-    <?php $hasRoster = !empty($showRoster); ?>
-    <?php if ($hasRoster): ?>
-    <div style="margin-top: 20px; padding-top: 20px; border-top: 2px solid #ddd;">
-        <h3>Current Roster (<span id="roster-count">0</span>)</h3>
-        <div id="roster-list">
-            <p style="color: #999; font-style: italic;">No restaurants added yet.</p>
-        </div>
-    </div>
     <?php endif; ?>
 
     <script>
