@@ -16,3 +16,5 @@ src/config.php
 **/__pycache__/
 **/.env
 .antigravity/
+.gemini/
+.agents/
