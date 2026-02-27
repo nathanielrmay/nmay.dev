@@ -6,6 +6,7 @@
     <br>
     <!-- Future sub-pages go here -->
     <li> <a href="/wrv/food/pg_index.php">Food</a> </li>
-    <li> <a href="/pg_404.php">Nothing here</a> </li>
+    <li> <a href="/wrv/pg_index.php">Books <br>( She doesn't read )</a> </li>
+    <li> <a href="/wrv/pg_index.php">Pilates Classes</a> </li>
 </ul>
 </div>
