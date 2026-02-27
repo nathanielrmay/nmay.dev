@@ -5,7 +5,7 @@
         private $config;
         public function __construct()
         {
-            $this->config = require(__DIR__ . '/../../db_config.php');
+            $this->config = require(__DIR__ . '/../../config.php');
         }
 
         public function getWebDbCon(): PDO

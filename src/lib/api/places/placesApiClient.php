@@ -50,4 +50,18 @@ class placesApiClient extends aApiClient {
             'place_id' => $placeId,
         ]);
     }
+    /**
+     * Search for places using a text query.
+     *
+     * @param string $query  Search string (e.g. "Taco Bell Austin")
+     * @param string $type   Place type filter (default: 'restaurant')
+     * @return array         API response with 'results' key
+     */
+    public function searchByText(string $query, string $type = 'restaurant'): array
+    {
+        return $this->apiGet('/textsearch/json', [
+            'query' => $query,
+            'type'  => $type,
+        ]);
+    }
 }

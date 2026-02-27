@@ -109,6 +109,13 @@ class basket
         ];
     }
 
+    //<editor-fold desc="Configuration">
+    static function config(): array
+    {
+        return require(__DIR__ . '/../config.php');
+    }
+    //</editor-fold>
+
     //<editor-fold desc="Database connections">
     static function db_web()
     {

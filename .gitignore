@@ -9,7 +9,7 @@
 !docs/
 
 # Specifically ignore the database config
-src/db_config.php
+src/config.php
 
 # Ignore other junk
 **/*.pyc
