@@ -6,6 +6,6 @@
 
     <li> <a href="/wrv/food/pg_index.php">Food</a> </li>
     <li> <a href="/wrv/food/pg_create_review.php">Create Review</a> </li>
-    <li> <a href="/wrv/food/pg_idc_wars.php">IDC Wars</a> </li>
+    <li> <a href="/wrv/food/idc_war/pg_idc_wars.php">IDC Wars</a> </li>
 </ul>
 </div>

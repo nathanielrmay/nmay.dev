@@ -1,14 +1,14 @@
 <?php
-namespace pages\wrv\food\food_war;
+namespace pages\wrv\food\idc_war;
 
-require_once __DIR__ . '/aFoodWarPage.php';
+require_once __DIR__ . '/aIdcWarPage.php';
 
 use lib\basket;
 use lib\db\models\wrv\db_idc_war;
 use lib\db\models\wrv\db_idc_war_places_place;
 use lib\db\models\wrv\db_idc_war_vote;
 
-class pg_vote extends aFoodWarPage {
+class pg_vote extends aIdcWarPage {
     public function getPageTitle() {
         return "I Don't Care Wars - Vote";
     }
@@ -93,7 +93,7 @@ if (empty($entries)) {
     <?php endif; ?>
 
     <?php if (!$success): ?>
-        <form method="POST" action="/wrv/food/food_war/pg_vote.php?war=<?= htmlspecialchars($warPk) ?>" id="vote-form">
+        <form method="POST" action="/wrv/food/idc_war/pg_vote.php?war=<?= htmlspecialchars($warPk) ?>" id="vote-form">
             <input type="hidden" name="war_pk" value="<?= htmlspecialchars($warPk) ?>">
             <input type="hidden" name="rankings_json" id="rankings-json" value="">
 
