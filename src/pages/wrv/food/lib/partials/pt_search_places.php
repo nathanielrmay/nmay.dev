@@ -7,83 +7,157 @@
 
     <?php $canAddRestaurants = $canAddRestaurants ?? true; ?>
     <?php if ($canAddRestaurants): ?>
-        <!-- Search Form -->
-        <form method="POST" action="<?= htmlspecialchars($formAction) ?>" style="margin-bottom: 30px; display: flex; gap: 10px;">
-            <input type="text" name="search_query" placeholder="Enter restaurant name (e.g. Taco Bell)" required 
+        <!-- Search Form (AJAX, no page reload) -->
+        <form id="places-search-form" style="margin-bottom: 30px; display: flex; gap: 10px;">
+            <input type="text" id="search-query" placeholder="Enter restaurant name (e.g. Taco Bell)" required 
                    style="flex: 2; padding: 10px; font-size: 1rem; border: 1px solid #ccc; border-radius: 4px;"
                    value="<?= htmlspecialchars($searchQuery ?? '') ?>">
-            <input type="text" name="location" placeholder="Location" required 
+            <input type="text" id="search-location" placeholder="Location" required 
                    style="flex: 1; padding: 10px; font-size: 1rem; border: 1px solid #ccc; border-radius: 4px;"
                    value="<?= htmlspecialchars($searchLocation ?? 'Springfield, Missouri') ?>">
-            <button type="submit" style="padding: 10px 20px; background-color: #6b4a8e; color: white; border: none; border-radius: 4px; font-size: 1rem; cursor: pointer;">
+            <button type="submit" id="search-btn" style="padding: 10px 20px; background-color: #6b4a8e; color: white; border: none; border-radius: 4px; font-size: 1rem; cursor: pointer;">
                 Search Maps
             </button>
         </form>
 
-        <!-- Search Results -->
-        <?php if (!empty($searchResults)): ?>
-            <h3>Results</h3>
-            <div style="display: flex; flex-direction: column; gap: 15px;">
-                <?php foreach ($searchResults as $result): ?>
-                    <div style="border: 1px solid #eee; padding: 15px; border-radius: 5px; display: flex; justify-content: space-between; align-items: center; background-color: #fafafa;">
-                        <div>
-                            <strong style="font-size: 1.1em; color: #333;"><?= htmlspecialchars($result['name']) ?></strong>
-                            <div style="color: #666; font-size: 0.9em; margin-top: 5px;">
-                                <?= htmlspecialchars($result['formatted_address']) ?>
-                            </div>
-                        </div>
-                        <?php if (!empty($useJsSelect)): ?>
-                            <button type="button" 
-                                    onclick="rosterAddPlace('<?= htmlspecialchars($result['place_id'], ENT_QUOTES) ?>', '<?= htmlspecialchars(addslashes($result['name']), ENT_QUOTES) ?>')"
-                                    style="padding: 8px 15px; background-color: #38827e; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">
-                                + Add
-                            </button>
-                        <?php else: ?>
-                            <form method="POST" action="<?= htmlspecialchars($formAction) ?>" style="margin: 0;">
-                                <input type="hidden" name="place_id" value="<?= htmlspecialchars($result['place_id']) ?>">
-                                <input type="hidden" name="place_name" value="<?= htmlspecialchars($result['name']) ?>">
-                                <button type="submit" style="padding: 8px 15px; background-color: #38827e; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">
-                                    Select
-                                </button>
-                            </form>
-                        <?php endif; ?>
-                    </div>
-                <?php endforeach; ?>
-            </div>
-        <?php elseif ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['search_query'])): ?>
-            <p style="color: #666;">No results found for that search.</p>
-        <?php endif; ?>
+        <!-- Search Results (populated by JS) -->
+        <div id="search-results"></div>
     <?php else: ?>
         <p style="color: #666; font-style: italic; margin-bottom: 20px;">Restaurants can only be added when the war is in "creation" status.</p>
     <?php endif; ?>
 
-    <?php if (!empty($useJsSelect)): ?>
     <!-- Roster managed by JS -->
+    <?php $hasRoster = !empty($showRoster); ?>
+    <?php if ($hasRoster): ?>
     <div style="margin-top: 20px; padding-top: 20px; border-top: 2px solid #ddd;">
         <h3>Current Roster (<span id="roster-count">0</span>)</h3>
         <div id="roster-list">
             <p style="color: #999; font-style: italic;">No restaurants added yet.</p>
         </div>
     </div>
+    <?php endif; ?>
 
     <script>
     (function() {
+        var canAdd = <?= json_encode($canAddRestaurants) ?>;
+        var hasRoster = <?= json_encode($hasRoster) ?>;
         var roster = <?= $initialRosterJson ?? '[]' ?>;
 
+        // --- Search ---
+        var searchForm = document.getElementById('places-search-form');
+        if (searchForm) {
+            searchForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                var query = document.getElementById('search-query').value.trim();
+                var location = document.getElementById('search-location').value.trim();
+                var btn = document.getElementById('search-btn');
+                var resultsDiv = document.getElementById('search-results');
+
+                if (!query) return;
+
+                btn.disabled = true;
+                btn.textContent = 'Searching...';
+                resultsDiv.innerHTML = '<p style="color: #666;">Searching...</p>';
+
+                fetch('/wrv/food/lib/ajax/pg_api_search_places.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ query: query, location: location })
+                })
+                .then(function(res) { return res.json(); })
+                .then(function(data) {
+                    btn.disabled = false;
+                    btn.textContent = 'Search Maps';
+
+                    if (data.error) {
+                        resultsDiv.innerHTML = '<p style="color: #c00;">Error: ' + escapeHtml(data.error) + '</p>';
+                        return;
+                    }
+
+                    if (!data.results || data.results.length === 0) {
+                        resultsDiv.innerHTML = '<p style="color: #666;">No results found for that search.</p>';
+                        return;
+                    }
+
+                    var html = '<h3>Results</h3><div style="display: flex; flex-direction: column; gap: 15px;">';
+                    data.results.forEach(function(r) {
+                        html += '<div style="border: 1px solid #eee; padding: 15px; border-radius: 5px; display: flex; justify-content: space-between; align-items: center; background-color: #fafafa;">';
+                        html += '<div>';
+                        html += '<strong style="font-size: 1.1em; color: #333;">' + escapeHtml(r.name) + '</strong>';
+                        html += '<div style="color: #666; font-size: 0.9em; margin-top: 5px;">' + escapeHtml(r.formatted_address) + '</div>';
+                        html += '</div>';
+                        html += '<button type="button" onclick="selectPlace(\'' + escapeAttr(r.place_id) + '\', \'' + escapeAttr(r.name) + '\')" ';
+                        html += 'style="padding: 8px 15px; background-color: #38827e; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; white-space: nowrap;">';
+                        html += '+ Add</button>';
+                        html += '</div>';
+                    });
+                    html += '</div>';
+                    resultsDiv.innerHTML = html;
+                })
+                .catch(function(err) {
+                    btn.disabled = false;
+                    btn.textContent = 'Search Maps';
+                    resultsDiv.innerHTML = '<p style="color: #c00;">Network error: ' + escapeHtml(err.message) + '</p>';
+                });
+            });
+        }
+
+        // --- Place selection (resolve via AJAX, then add to roster or callback) ---
+        window.selectPlace = function(googlePlaceId, placeName) {
+            fetch('/wrv/food/lib/ajax/pg_api_places.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ place_id: googlePlaceId, place_name: placeName })
+            })
+            .then(function(res) { return res.json(); })
+            .then(function(data) {
+                if (data.error) {
+                    alert('Error: ' + data.error);
+                    return;
+                }
+
+                if (hasRoster) {
+                    // Check for duplicate
+                    for (var i = 0; i < roster.length; i++) {
+                        if (roster[i].google_place_id === data.id) {
+                            alert(data.name + ' is already in the roster!');
+                            return;
+                        }
+                    }
+                    roster.push({
+                        place_pk: data.pk,
+                        place_name: data.name,
+                        google_place_id: data.id
+                    });
+                    renderRoster();
+                }
+
+                // Fire a custom event so parent pages can react
+                document.dispatchEvent(new CustomEvent('placeSelected', { detail: data }));
+            })
+            .catch(function(err) {
+                alert('Network error: ' + err.message);
+            });
+        };
+
+        // --- Roster rendering ---
         function renderRoster() {
+            if (!hasRoster) return;
             var list = document.getElementById('roster-list');
             var count = document.getElementById('roster-count');
             var jsonInput = document.getElementById('restaurants-json');
 
             count.textContent = roster.length;
-            jsonInput.value = JSON.stringify(roster);
+            if (jsonInput) jsonInput.value = JSON.stringify(roster);
+            // Also sync to submit form if it exists
+            var submitJson = document.getElementById('submit-restaurants-json');
+            if (submitJson) submitJson.value = JSON.stringify(roster);
 
             if (roster.length === 0) {
                 list.innerHTML = '<p style="color: #999; font-style: italic;">No restaurants added yet.</p>';
                 return;
             }
 
-            var canAdd = <?= json_encode($canAddRestaurants) ?>;
             var html = '<div style="display: flex; flex-direction: column; gap: 10px;">';
             roster.forEach(function(r, i) {
                 html += '<div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; background-color: #fff; border: 1px solid #ddd; border-radius: 5px;">';
@@ -100,53 +174,24 @@
             list.innerHTML = html;
         }
 
+        window.rosterRemove = function(index) {
+            roster.splice(index, 1);
+            renderRoster();
+        };
+
+        // --- Helpers ---
         function escapeHtml(text) {
             var div = document.createElement('div');
             div.appendChild(document.createTextNode(text));
             return div.innerHTML;
         }
 
-        window.rosterRemove = function(index) {
-            roster.splice(index, 1);
-            renderRoster();
-        };
-
-        window.rosterAddPlace = function(googlePlaceId, placeName) {
-            // Check for duplicate
-            for (var i = 0; i < roster.length; i++) {
-                if (roster[i].google_place_id === googlePlaceId) {
-                    alert(placeName + ' is already in the roster!');
-                    return;
-                }
-            }
-
-            // AJAX call to resolve/create the place
-            fetch('/wrv/food/lib/ajax/pg_api_places.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ place_id: googlePlaceId, place_name: placeName })
-            })
-            .then(function(res) { return res.json(); })
-            .then(function(data) {
-                if (data.error) {
-                    alert('Error: ' + data.error);
-                    return;
-                }
-                roster.push({
-                    place_pk: data.pk,
-                    place_name: data.name,
-                    google_place_id: data.id
-                });
-                renderRoster();
-            })
-            .catch(function(err) {
-                alert('Network error: ' + err.message);
-            });
-        };
+        function escapeAttr(text) {
+            return text.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '\\"');
+        }
 
         // Initial render
         renderRoster();
     })();
     </script>
-    <?php endif; ?>
 </div>

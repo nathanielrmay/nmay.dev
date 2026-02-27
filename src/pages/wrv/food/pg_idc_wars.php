@@ -4,7 +4,6 @@ namespace pages\wrv\food;
 require_once __DIR__ . '/aFoodPage.php';
 
 use lib\basket;
-use lib\api\places\placesApiClient;
 use lib\db\models\wrv\db_idc_war;
 use lib\db\models\wrv\db_idc_war_places_place;
 use lib\db\models\wrv\db_idc_war_status;
@@ -20,36 +19,11 @@ $warModel = new db_idc_war($db);
 $warPlacesModel = new db_idc_war_places_place($db);
 $statusModel = new db_idc_war_status($db);
 
-$searchResults = [];
 $error = null;
 
 // Load all wars and statuses for dropdowns
 $allWars = $warModel->readAll();
 $allStatuses = $statusModel->readAll();
-
-// Handle Search Submission
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['search_query'])) {
-    $query = trim($_POST['search_query']);
-    $location = trim($_POST['location'] ?? 'Springfield, Missouri');
-    
-    if (!empty($query)) {
-        try {
-            $fullQuery = !empty($location) ? $query . ' in ' . $location : $query;
-            $config = basket::config();
-            $apiKey = $config['google']['places_api_key'] ?? '';
-            
-            if (empty($apiKey)) {
-                $error = "Google Places API key is missing from config.php.";
-            } else {
-                $client = new placesApiClient($apiKey);
-                $response = $client->searchByText($fullQuery);
-                $searchResults = $response['results'] ?? [];
-            }
-        } catch (\Exception $e) {
-            $error = "Error searching API: " . $e->getMessage();
-        }
-    }
-}
 
 // Handle Submit Changes (save/update war + entries)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_war'])) {
@@ -237,12 +211,8 @@ $initialRosterJson = json_encode($jsEntries);
         <h3>Restaurants</h3>
         <?php 
         $searchArgs = [
-            'searchResults'    => $searchResults,
-            'searchQuery'      => $_POST['search_query'] ?? '',
-            'searchLocation'   => $_POST['location'] ?? 'Springfield, Missouri',
-            'formAction'       => '/wrv/food/pg_idc_wars.php' . ($selectedWar ? '?war=' . $selectedWar['pk'] : ''),
-            'error'            => $error,
-            'useJsSelect'      => true,
+            'error'             => $error,
+            'showRoster'        => true,
             'initialRosterJson' => $initialRosterJson,
             'canAddRestaurants' => (!$selectedWar || $selectedWar['fk_status'] == 5)
         ];
