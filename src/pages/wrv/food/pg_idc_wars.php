@@ -175,11 +175,41 @@ $initialRosterJson = json_encode($jsEntries);
                     </select>
                 </div>
                 <div>
-                    <label style="font-weight: bold; display: block; margin-bottom: 5px;">Deadline:</label>
-                    <?php $defaultDeadline = date('Y-m-d\TH:i', strtotime('+1 hour')); ?>
-                    <input type="datetime-local" name="deadline" 
+                    <label style="font-weight: bold; display: block; margin-bottom: 5px;">
+                        Deadline <span style="font-weight: normal; color: #666; font-size: 0.85rem;">(Input as UTC)</span>:
+                    </label>
+                    <?php $defaultDeadline = gmdate('Y-m-d\TH:i', strtotime('+1 hour')); ?>
+                    <input type="datetime-local" name="deadline" id="deadline-input"
                            style="padding: 8px; font-size: 1rem; border-radius: 4px; border: 1px solid #ccc; width: 100%; max-width: 300px;"
-                           value="<?= $selectedWar && $selectedWar['deadline'] ? date('Y-m-d\TH:i', strtotime($selectedWar['deadline'])) : $defaultDeadline ?>">
+                           value="<?= $selectedWar && $selectedWar['deadline'] ? gmdate('Y-m-d\TH:i', strtotime($selectedWar['deadline'])) : $defaultDeadline ?>">
+                    <div id="local-time-display" style="color: #0066cc; font-size: 0.9rem; margin-top: 5px;"></div>
+                    <script>
+                        (function() {
+                            var input = document.getElementById('deadline-input');
+                            var display = document.getElementById('local-time-display');
+                            
+                            function updateDisplay() {
+                                if (!input.value) {
+                                    display.textContent = '';
+                                    return;
+                                }
+                                // Treat the input value as UTC by appending 'Z'
+                                var dateObj = new Date(input.value + 'Z');
+                                if (isNaN(dateObj.getTime())) {
+                                    display.textContent = '';
+                                    return;
+                                }
+                                // Format using the browser's local timezone
+                                var options = { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', timeZoneName: 'short' };
+                                display.textContent = 'Local Time: ' + dateObj.toLocaleString(undefined, options);
+                            }
+
+                            input.addEventListener('input', updateDisplay);
+                            input.addEventListener('change', updateDisplay);
+                            // Initial call
+                            updateDisplay();
+                        })();
+                    </script>
                 </div>
                 <div>
                     <label style="font-weight: bold; display: block; margin-bottom: 5px;">Status:</label>
