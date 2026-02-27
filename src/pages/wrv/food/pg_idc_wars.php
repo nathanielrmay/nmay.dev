@@ -76,7 +76,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_war'])) {
         $warPk = (int)$existingWarPk;
     } else {
         // Create new war
-        if (!isset($warData['fk_status'])) $warData['fk_status'] = 1;
+        if (!isset($warData['fk_status'])) $warData['fk_status'] = 5; // creation
         if (!isset($warData['fk_idc_war_type'])) $warData['fk_idc_war_type'] = 3;
         $warPk = $warModel->write($warData);
     }
@@ -139,7 +139,9 @@ $initialRosterJson = json_encode($jsEntries);
         <select id="war-selector" onchange="if(this.value) { window.location.href='/wrv/food/pg_idc_wars.php?war=' + this.value; } else { window.location.href='/wrv/food/pg_idc_wars.php'; }"
                 style="padding: 8px; font-size: 1rem; border-radius: 4px; border: 1px solid #ccc; min-width: 250px;">
             <option value="">-- New War --</option>
-            <?php foreach ($allWars as $war): ?>
+            <?php foreach ($allWars as $war): 
+                if ($war['fk_status'] == 4 && (!$selectedWar || $selectedWar['pk'] != $war['pk'])) continue; // skip complete wars, unless currently selected
+            ?>
                 <option value="<?= $war['pk'] ?>" <?= ($selectedWar && $selectedWar['pk'] == $war['pk']) ? 'selected' : '' ?>>
                     <?= htmlspecialchars($war['name'] ?: "War #{$war['pk']}") ?>
                 </option>
@@ -174,18 +176,19 @@ $initialRosterJson = json_encode($jsEntries);
                 </div>
                 <div>
                     <label style="font-weight: bold; display: block; margin-bottom: 5px;">Deadline:</label>
+                    <?php $defaultDeadline = date('Y-m-d\TH:i', strtotime('+1 hour')); ?>
                     <input type="datetime-local" name="deadline" 
                            style="padding: 8px; font-size: 1rem; border-radius: 4px; border: 1px solid #ccc; width: 100%; max-width: 300px;"
-                           value="<?= $selectedWar && $selectedWar['deadline'] ? date('Y-m-d\TH:i', strtotime($selectedWar['deadline'])) : '' ?>">
+                           value="<?= $selectedWar && $selectedWar['deadline'] ? date('Y-m-d\TH:i', strtotime($selectedWar['deadline'])) : $defaultDeadline ?>">
                 </div>
                 <div>
                     <label style="font-weight: bold; display: block; margin-bottom: 5px;">Status:</label>
                     <select name="war_status" style="padding: 8px; font-size: 1rem; border-radius: 4px; border: 1px solid #ccc; width: 100%; max-width: 300px;">
                         <?php foreach ($allStatuses as $status): 
-                            // Skip round-based statuses for now
-                            if (in_array($status['status'], ['rnd1', 'rnd2', 'rnd3'])) continue;
+                            // Only allow creation (5), rnd1 (1), complete (4)
+                            if (!in_array($status['pk'], [1, 4, 5])) continue;
                         ?>
-                            <option value="<?= $status['pk'] ?>" <?= ($selectedWar && $selectedWar['fk_status'] == $status['pk']) ? 'selected' : '' ?>>
+                            <option value="<?= $status['pk'] ?>" <?= ($selectedWar && $selectedWar['fk_status'] == $status['pk']) || (!$selectedWar && $status['pk'] == 5) ? 'selected' : '' ?>>
                                 <?= htmlspecialchars($status['status']) ?>
                             </option>
                         <?php endforeach; ?>
@@ -210,7 +213,8 @@ $initialRosterJson = json_encode($jsEntries);
             'formAction'       => '/wrv/food/pg_idc_wars.php' . ($selectedWar ? '?war=' . $selectedWar['pk'] : ''),
             'error'            => $error,
             'useJsSelect'      => true,
-            'initialRosterJson' => $initialRosterJson
+            'initialRosterJson' => $initialRosterJson,
+            'canAddRestaurants' => (!$selectedWar || $selectedWar['fk_status'] == 5)
         ];
         echo basket::render('pages/wrv/food/lib/partials/pt_search_places.php', $searchArgs); 
         ?>
