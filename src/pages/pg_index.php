@@ -34,13 +34,13 @@ class pg_index extends aPage {
   .neon-text {
     font-family: 'Sacramento', cursive;
     font-size: clamp(2rem, 4.5vw, 4rem);
-    color: #ff2d95;
+    color: #39ff14;
     text-shadow:
-      0 0 7px #ff2d95,
-      0 0 20px #ff2d95,
-      0 0 40px #ff2d95,
-      0 0 80px rgba(255,45,149,0.5),
-      0 0 120px rgba(255,45,149,0.3);
+      0 0 7px #39ff14,
+      0 0 20px #39ff14,
+      0 0 40px #39ff14,
+      0 0 80px rgba(57,255,20,0.5),
+      0 0 120px rgba(57,255,20,0.3);
     line-height: 1.4;
     animation: breathe 4s ease-in-out infinite;
   }
@@ -48,9 +48,9 @@ class pg_index extends aPage {
   .neon-attr {
     font-family: 'Sacramento', cursive;
     font-size: clamp(1rem, 2vw, 1.6rem);
-    color: rgba(255,45,149,0.5);
+    color: rgba(57,255,20,0.5);
     text-shadow:
-      0 0 10px rgba(255,45,149,0.25);
+      0 0 10px rgba(57,255,20,0.25);
     margin-top: 18px;
     text-align: right;
   }
@@ -77,25 +77,25 @@ class pg_index extends aPage {
     0%, 19.9%, 22%, 62.9%, 64%, 64.9%, 70%, 100% {
       opacity: 1;
       text-shadow:
-        0 0 7px #ff2d95,
-        0 0 20px #ff2d95,
-        0 0 40px #ff2d95,
-        0 0 80px rgba(255,45,149,0.5);
+        0 0 7px #39ff14,
+        0 0 20px #39ff14,
+        0 0 40px #39ff14,
+        0 0 80px rgba(57,255,20,0.5);
     }
     20%, 21.9% {
       opacity: 0.3;
       text-shadow:
-        0 0 4px #ff2d95;
+        0 0 4px #39ff14;
     }
     63%, 63.9% {
       opacity: 0.25;
       text-shadow:
-        0 0 3px #ff2d95;
+        0 0 3px #39ff14;
     }
     65%, 69.9% {
       opacity: 0.45;
       text-shadow:
-        0 0 8px #ff2d95;
+        0 0 8px #39ff14;
     }
   }
 
