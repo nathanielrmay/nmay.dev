@@ -20,6 +20,39 @@ class pg_index extends aPage {
     align-items: center;
     justify-content: center;
     overflow: hidden;
+    /* Define CSS variables that the animation will manipulate */
+    --neon-clr: #ff2d95;
+    --neon-glow-1: rgba(255,45,149,0.5);
+    --neon-glow-2: rgba(255,45,149,0.3);
+    animation: color-cycle 24s linear infinite;
+  }
+
+  /* Define the color cycling animation on the container so children inherit the variables */
+  @keyframes color-cycle {
+    /* Pink */
+    0%, 25% {
+      --neon-clr: #ff2d95;
+      --neon-glow-1: rgba(255,45,149,0.5);
+      --neon-glow-2: rgba(255,45,149,0.3);
+    }
+    /* Light Blue */
+    33%, 58% {
+      --neon-clr: #00f0ff;
+      --neon-glow-1: rgba(0,240,255,0.5);
+      --neon-glow-2: rgba(0,240,255,0.3);
+    }
+    /* Light Green */
+    66%, 91% {
+      --neon-clr: #39ff14;
+      --neon-glow-1: rgba(57,255,20,0.5);
+      --neon-glow-2: rgba(57,255,20,0.3);
+    }
+    /* Back to Pink */
+    100% {
+      --neon-clr: #ff2d95;
+      --neon-glow-1: rgba(255,45,149,0.5);
+      --neon-glow-2: rgba(255,45,149,0.3);
+    }
   }
 
   .neon-sign {
@@ -31,28 +64,54 @@ class pg_index extends aPage {
     border-radius: 6px;
   }
 
+  /* Note: standard CSS animation on variables requires @property in modern browsers for smooth fading. 
+     Since @property support isn't 100% universal yet, if it snaps instead of fading gracefully, 
+     the fallback is still a cool color change. */
+  @property --neon-clr { syntax: '<color>'; inherits: true; initial-value: #ff2d95; }
+  @property --neon-glow-1 { syntax: '<color>'; inherits: true; initial-value: rgba(255,45,149,0.5); }
+  @property --neon-glow-2 { syntax: '<color>'; inherits: true; initial-value: rgba(255,45,149,0.3); }
+
   .neon-text {
     font-family: 'Sacramento', cursive;
     font-size: clamp(2rem, 4.5vw, 4rem);
-    color: #39ff14;
+    color: var(--neon-clr);
     text-shadow:
-      0 0 7px #39ff14,
-      0 0 20px #39ff14,
-      0 0 40px #39ff14,
-      0 0 80px rgba(57,255,20,0.5),
-      0 0 120px rgba(57,255,20,0.3);
+      0 0 7px var(--neon-clr),
+      0 0 20px var(--neon-clr),
+      0 0 40px var(--neon-clr),
+      0 0 80px var(--neon-glow-1),
+      0 0 120px var(--neon-glow-2);
     line-height: 1.4;
+    position: relative;
+  }
+
+  /* Added a pseudo-element for the breathing effect so it doesn't fight with the flicker animation on text-shadow */
+  .neon-text::before {
+    content: '';
+    position: absolute;
+    inset: -20px;
+    background: var(--neon-clr);
+    filter: blur(40px);
+    opacity: 0.15;
+    z-index: -1;
     animation: breathe 4s ease-in-out infinite;
+    pointer-events: none;
   }
 
   .neon-attr {
     font-family: 'Sacramento', cursive;
     font-size: clamp(1rem, 2vw, 1.6rem);
-    color: rgba(57,255,20,0.5);
+    color: var(--neon-glow-1);
     text-shadow:
-      0 0 10px rgba(57,255,20,0.25);
+      0 0 10px rgba(255,255,255,0.2);
     margin-top: 18px;
     text-align: right;
+  }
+
+  /* subtle overall brightness pulse */
+  @keyframes breathe {
+    0%, 100% { opacity: 0.15; }
+    50%      { opacity: 0.05; }
   }
 
   /* the flickering section */
@@ -61,41 +120,30 @@ class pg_index extends aPage {
     animation: flicker 6s linear infinite;
   }
 
-  /* wall-reflected glow underneath the sign */
-  .neon-sign::after {
-    display: none;
-  }
-
-  /* subtle overall brightness pulse */
-  @keyframes breathe {
-    0%, 100% { opacity: 1; }
-    50%      { opacity: 0.92; }
-  }
-
   /* irregular flicker for one word */
   @keyframes flicker {
     0%, 19.9%, 22%, 62.9%, 64%, 64.9%, 70%, 100% {
       opacity: 1;
       text-shadow:
-        0 0 7px #39ff14,
-        0 0 20px #39ff14,
-        0 0 40px #39ff14,
-        0 0 80px rgba(57,255,20,0.5);
+        0 0 7px var(--neon-clr),
+        0 0 20px var(--neon-clr),
+        0 0 40px var(--neon-clr),
+        0 0 80px var(--neon-glow-1);
     }
     20%, 21.9% {
       opacity: 0.3;
       text-shadow:
-        0 0 4px #39ff14;
+        0 0 4px var(--neon-clr);
     }
     63%, 63.9% {
       opacity: 0.25;
       text-shadow:
-        0 0 3px #39ff14;
+        0 0 3px var(--neon-clr);
     }
     65%, 69.9% {
       opacity: 0.45;
       text-shadow:
-        0 0 8px #39ff14;
+        0 0 8px var(--neon-clr);
     }
   }
 
@@ -118,7 +166,7 @@ class pg_index extends aPage {
     content: '';
     position: absolute;
     top: 0; left: 0; right: 0; bottom: 0;
-    border: 1px solid rgba(255,45,149,0.08);
+    border: 1px solid rgba(255,255,255,0.03);
     border-radius: 4px;
     pointer-events: none;
   }
