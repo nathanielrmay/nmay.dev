@@ -5,7 +5,11 @@
     </button>
     <a href="https://nmay.dev">nmay.dev</a>
     <span class="sep">|</span>
-    <a href="/wrv/pg_index.php">WRV</a>
+    <a href="/wrv/food/pg_index.php">Food</a>
+    <span class="sep">|</span>
+    <a href="/wrv/food/pg_index.php">Books</a>
+    <span class="sep">|</span>
+    <a href="//wrv/food/pg_index.php">Pilates</a>
     <span style="margin-left: auto; font-size: 0.8em; align-self: center;">
         <span style="margin-left: auto; font-size: 0.65em; align-self: center;">today is </span>
         <span id="local-date"></span>
