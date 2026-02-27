@@ -17,6 +17,16 @@ class db_idc_war
     }
 
     /**
+     * Reads all tournaments ordered by most recent first.
+     * @return array
+     */
+    public function readAll(): array
+    {
+        $stmt = $this->db->query('SELECT * FROM web.wrv.idc_war ORDER BY pk DESC');
+        return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+    }
+
+    /**
      * Reads a specific tournament by its primary key.
      * @param int $pk
      * @return array|false

@@ -6,8 +6,8 @@ require_once __DIR__ . '/aFoodPage.php';
 use lib\basket;
 use lib\api\places\placesApiClient;
 use lib\db\models\wrv\db_idc_war;
-use lib\db\models\wrv\db_idc_war_entry;
-use lib\db\models\wrv\db_places_place;
+use lib\db\models\wrv\db_idc_war_places_place;
+use lib\db\models\wrv\db_idc_war_status;
 
 class pg_idc_wars extends aFoodPage {
     public function getPageTitle() {
@@ -15,21 +15,17 @@ class pg_idc_wars extends aFoodPage {
     }
 }
 
+$db = basket::db_web();
+$warModel = new db_idc_war($db);
+$warPlacesModel = new db_idc_war_places_place($db);
+$statusModel = new db_idc_war_status($db);
+
 $searchResults = [];
 $error = null;
 
-// Temporary hardcoded default until we build out the full tournament lifecycle UI
-$currentWarPk = 1; 
-
-$db = basket::db_web();
-$entryModel = new db_idc_war_entry($db);
-
-// Handle Remove Entry
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['remove_entry_pk'])) {
-    $entryModel->deleteEntry((int)$_POST['remove_entry_pk']);
-    header('Location: /wrv/food/pg_idc_wars.php?removed=true');
-    exit;
-}
+// Load all wars and statuses for dropdowns
+$allWars = $warModel->readAll();
+$allStatuses = $statusModel->readAll();
 
 // Handle Search Submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['search_query'])) {
@@ -39,7 +35,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['search_query'])) {
     if (!empty($query)) {
         try {
             $fullQuery = !empty($location) ? $query . ' in ' . $location : $query;
-            
             $config = basket::config();
             $apiKey = $config['google']['places_api_key'] ?? '';
             
@@ -56,115 +51,173 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['search_query'])) {
     }
 }
 
-// Handle Place Selection & Save to Tournament
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_id']) && isset($_POST['place_name'])) {
-    $placeId = $_POST['place_id'];
-    $placeName = $_POST['place_name'];
+// Handle Submit Changes (save/update war + entries)
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_war'])) {
+    $warData = [];
     
-    $placesModel = new db_places_place($db);
+    $warName = trim($_POST['war_name'] ?? '');
+    if (!empty($warName)) $warData['name'] = $warName;
     
-    // Check if the place already exists in the master places table
-    $existingPlace = $placesModel->readById($placeId);
-    $placePk = null;
+    $warFormat = $_POST['tournament_format'] ?? '';
+    if ($warFormat === 'ranked_choice') $warData['fk_idc_war_type'] = 3;
     
-    if ($existingPlace) {
-        $placePk = $existingPlace['pk'];
+    $warDeadline = $_POST['deadline'] ?? '';
+    if (!empty($warDeadline)) $warData['deadline'] = $warDeadline;
+    
+    $warStatus = $_POST['war_status'] ?? '';
+    if (!empty($warStatus)) $warData['fk_status'] = (int)$warStatus;
+    
+    $existingWarPk = $_POST['existing_war_pk'] ?? '';
+    
+    if (!empty($existingWarPk)) {
+        // Update existing war
+        $warData['pk'] = (int)$existingWarPk;
+        $warModel->write($warData);
+        $warPk = (int)$existingWarPk;
     } else {
-        // Save new place
-        $placePk = $placesModel->write([
-            'id' => $placeId,
-            'name' => $placeName
-        ]);
+        // Create new war
+        if (!isset($warData['fk_status'])) $warData['fk_status'] = 1;
+        if (!isset($warData['fk_idc_war_type'])) $warData['fk_idc_war_type'] = 3;
+        $warPk = $warModel->write($warData);
     }
     
-    if ($placePk) {
-        $newEntryPk = $entryModel->write([
-            'fk_idc_war' => $currentWarPk,
-            'fk_places_place' => $placePk
-        ]);
+    if ($warPk) {
+        // Delete all existing entries for this war, then recreate from JS array
+        $warPlacesModel->deleteByWarPk($warPk);
         
-        if (!$newEntryPk) {
-            $error = "Failed to add restaurant to the tournament.";
-        } else {
-            header('Location: /wrv/food/pg_idc_wars.php?added=true');
-            exit;
+        $restaurantJson = $_POST['restaurants_json'] ?? '[]';
+        $restaurants = json_decode($restaurantJson, true) ?: [];
+        
+        foreach ($restaurants as $r) {
+            $placePk = (int)($r['place_pk'] ?? 0);
+            if ($placePk > 0) {
+                $warPlacesModel->write($warPk, $placePk);
+            }
         }
+        
+        header('Location: /wrv/food/pg_idc_wars.php?war=' . $warPk . '&saved=true');
+        exit;
     } else {
-        $error = "Failed to save restaurant to the global database.";
+        $error = "Failed to save the war.";
     }
 }
 
-// Load current entries for this tournament
-$currentEntries = $entryModel->readEntriesForWar($currentWarPk);
+// Determine which war to load (default to empty/new)
+$selectedWarPk = $_GET['war'] ?? null;
+$selectedWar = null;
+$currentEntries = [];
+
+if ($selectedWarPk) {
+    $selectedWar = $warModel->readById((int)$selectedWarPk);
+    if ($selectedWar) {
+        $currentEntries = $warPlacesModel->readByWarPk((int)$selectedWarPk);
+    }
+}
+
+// Refresh war list after any potential writes
+$allWars = $warModel->readAll();
+
+// Build JS-friendly entries array for the partial
+$jsEntries = [];
+foreach ($currentEntries as $entry) {
+    $jsEntries[] = [
+        'place_pk' => (int)$entry['fk_places_place'],
+        'place_name' => $entry['place_name'],
+        'google_place_id' => $entry['google_place_id']
+    ];
+}
+$initialRosterJson = json_encode($jsEntries);
 ?>
 
 <div style="padding: 20px; max-width: 800px;">
     <h2>I Don't Care (IDC) Wars ⚔️🍔</h2>
-    <p>For when nobody can make up their mind on where to eat. Set up a tournament, build a list of restaurants, and let the games decide!</p>
+    <p>For when nobody can make up their mind on where to eat.</p>
     
-    <div style="background-color: #fafafa; padding: 20px; border-radius: 8px; border: 1px solid #ccc; margin-bottom: 20px;">
-        <h3>1. Tournament Setup</h3>
-        <div style="display: flex; flex-direction: column; gap: 15px;">
-            <div>
-                <label style="font-weight: bold; display: block; margin-bottom: 5px;">Format:</label>
-                <select name="tournament_format" style="padding: 8px; font-size: 1rem; border-radius: 4px; border: 1px solid #ccc; width: 100%; max-width: 300px;">
-                    <option value="ranked_choice">Ranked Choice Voting (One Round)</option>
-                </select>
-            </div>
-            <div>
-                <label style="font-weight: bold; display: block; margin-bottom: 5px;">Deadline:</label>
-                <input type="datetime-local" name="deadline" 
-                       style="padding: 8px; font-size: 1rem; border-radius: 4px; border: 1px solid #ccc; width: 100%; max-width: 300px;">
+    <!-- War Selector -->
+    <div style="margin-bottom: 20px;">
+        <label style="font-weight: bold; margin-right: 10px;">Load Existing War:</label>
+        <select id="war-selector" onchange="if(this.value) { window.location.href='/wrv/food/pg_idc_wars.php?war=' + this.value; } else { window.location.href='/wrv/food/pg_idc_wars.php'; }"
+                style="padding: 8px; font-size: 1rem; border-radius: 4px; border: 1px solid #ccc; min-width: 250px;">
+            <option value="">-- New War --</option>
+            <?php foreach ($allWars as $war): ?>
+                <option value="<?= $war['pk'] ?>" <?= ($selectedWar && $selectedWar['pk'] == $war['pk']) ? 'selected' : '' ?>>
+                    <?= htmlspecialchars($war['name'] ?: "War #{$war['pk']}") ?>
+                </option>
+            <?php endforeach; ?>
+        </select>
+    </div>
+
+    <?php if (isset($_GET['saved'])): ?>
+        <div style="background-color: #e6ffe6; color: #008000; padding: 10px 15px; border-radius: 5px; margin-bottom: 15px; border: 1px solid #b3ffb3;">
+            War saved successfully!
+        </div>
+    <?php endif; ?>
+
+    <form method="POST" action="/wrv/food/pg_idc_wars.php" id="war-form">
+        <input type="hidden" name="existing_war_pk" value="<?= $selectedWar ? $selectedWar['pk'] : '' ?>">
+        
+        <!-- Tournament Setup -->
+        <div style="background-color: #fafafa; padding: 20px; border-radius: 8px; border: 1px solid #ccc; margin-bottom: 20px;">
+            <h3>Tournament Setup</h3>
+            <div style="display: flex; flex-direction: column; gap: 15px;">
+                <div>
+                    <label style="font-weight: bold; display: block; margin-bottom: 5px;">Name:</label>
+                    <input type="text" name="war_name" placeholder="e.g. Friday Lunch War" 
+                           style="padding: 8px; font-size: 1rem; border-radius: 4px; border: 1px solid #ccc; width: 100%; max-width: 300px;"
+                           value="<?= htmlspecialchars($selectedWar['name'] ?? '') ?>">
+                </div>
+                <div>
+                    <label style="font-weight: bold; display: block; margin-bottom: 5px;">Format:</label>
+                    <select name="tournament_format" style="padding: 8px; font-size: 1rem; border-radius: 4px; border: 1px solid #ccc; width: 100%; max-width: 300px;">
+                        <option value="ranked_choice">Ranked Choice Voting (One Round)</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="font-weight: bold; display: block; margin-bottom: 5px;">Deadline:</label>
+                    <input type="datetime-local" name="deadline" 
+                           style="padding: 8px; font-size: 1rem; border-radius: 4px; border: 1px solid #ccc; width: 100%; max-width: 300px;"
+                           value="<?= $selectedWar && $selectedWar['deadline'] ? date('Y-m-d\TH:i', strtotime($selectedWar['deadline'])) : '' ?>">
+                </div>
+                <div>
+                    <label style="font-weight: bold; display: block; margin-bottom: 5px;">Status:</label>
+                    <select name="war_status" style="padding: 8px; font-size: 1rem; border-radius: 4px; border: 1px solid #ccc; width: 100%; max-width: 300px;">
+                        <?php foreach ($allStatuses as $status): ?>
+                            <option value="<?= $status['pk'] ?>" <?= ($selectedWar && $selectedWar['fk_status'] == $status['pk']) ? 'selected' : '' ?>>
+                                <?= htmlspecialchars($status['status']) ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
             </div>
         </div>
-    </div>
 
-    <div style="background-color: #fafafa; padding: 20px; border-radius: 8px; border: 1px solid #ccc; margin-bottom: 20px;">
-        <h3>2. Add Restaurants</h3>
-        <?php if (isset($_GET['added'])): ?>
-            <div style="background-color: #e6ffe6; color: #008000; padding: 10px 15px; border-radius: 5px; margin-bottom: 15px; border: 1px solid #b3ffb3;">
-                Restaurant added successfully!
-            </div>
-        <?php endif; ?>
-        <?php if (isset($_GET['removed'])): ?>
-            <div style="background-color: #fff3e0; color: #e65100; padding: 10px 15px; border-radius: 5px; margin-bottom: 15px; border: 1px solid #ffe0b2;">
-                Restaurant removed.
-            </div>
-        <?php endif; ?>
-        
-        <?php 
-        $searchArgs = [
-            'searchResults'  => $searchResults,
-            'searchQuery'    => $_POST['search_query'] ?? '',
-            'searchLocation' => $_POST['location'] ?? 'Springfield, Missouri',
-            'formAction'     => '/wrv/food/pg_idc_wars.php',
-            'error'          => $error
-        ];
-        echo basket::render('pages/wrv/food/lib/partials/pt_search_places.php', $searchArgs); 
-        ?>
-    </div>
+        <!-- Restaurant Search + Roster (managed by the partial) -->
+        <div style="background-color: #fafafa; padding: 20px; border-radius: 8px; border: 1px solid #ccc; margin-bottom: 20px;">
+            <h3>Restaurants</h3>
+            <?php 
+            $searchArgs = [
+                'searchResults'    => $searchResults,
+                'searchQuery'      => $_POST['search_query'] ?? '',
+                'searchLocation'   => $_POST['location'] ?? 'Springfield, Missouri',
+                'formAction'       => '/wrv/food/pg_idc_wars.php' . ($selectedWar ? '?war=' . $selectedWar['pk'] : ''),
+                'error'            => $error,
+                'useJsSelect'      => true,
+                'initialRosterJson' => $initialRosterJson
+            ];
+            echo basket::render('pages/wrv/food/lib/partials/pt_search_places.php', $searchArgs); 
+            ?>
+        </div>
 
-    <div style="background-color: #fafafa; padding: 20px; border-radius: 8px; border: 1px solid #ccc; margin-bottom: 20px;">
-        <h3>3. Current Roster (<?= count($currentEntries) ?>)</h3>
-        <?php if (empty($currentEntries)): ?>
-            <p style="color: #999; font-style: italic;">No restaurants added yet. Use the search above to add some!</p>
-        <?php else: ?>
-            <div style="display: flex; flex-direction: column; gap: 10px;">
-                <?php foreach ($currentEntries as $i => $entry): ?>
-                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; background-color: #fff; border: 1px solid #ddd; border-radius: 5px;">
-                        <div>
-                            <span style="font-weight: bold; color: #6b4a8e; margin-right: 8px;"><?= $i + 1 ?>.</span>
-                            <span style="font-size: 1.05em; color: #333;"><?= htmlspecialchars($entry['place_name']) ?></span>
-                        </div>
-                        <form method="POST" action="/wrv/food/pg_idc_wars.php" style="margin: 0;">
-                            <input type="hidden" name="remove_entry_pk" value="<?= $entry['entry_pk'] ?>">
-                            <button type="submit" style="padding: 5px 12px; background-color: #e74c3c; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.85em;" onclick="return confirm('Remove this restaurant?');">
-                                ✕
-                            </button>
-                        </form>
-                    </div>
-                <?php endforeach; ?>
-            </div>
-        <?php endif; ?>
-    </div>
+        <!-- Bottom Buttons -->
+        <div style="display: flex; gap: 15px; justify-content: flex-end;">
+            <a href="/wrv/food/pg_idc_wars.php" 
+               style="padding: 10px 25px; background-color: #888; color: white; border: none; border-radius: 4px; font-size: 1rem; font-weight: bold; cursor: pointer; text-decoration: none; display: inline-block;">
+                New / Clear
+            </a>
+            <button type="submit" name="submit_war" value="1"
+                    style="padding: 10px 25px; background-color: #38827e; color: white; border: none; border-radius: 4px; font-size: 1rem; font-weight: bold; cursor: pointer;">
+                Submit Changes
+            </button>
+        </div>
+    </form>
 </div>
