@@ -56,6 +56,7 @@ To avoid class redeclaration issues and improve code organization, the following
 *   **Location:** `src/pages/[section]/partial/` or `src/lib/partials/`
 *   **Naming:** `pt_[name].php` (e.g., `pt_news.php`, `pt_teams.php`).
 *   **Usage:** Included via `basket::render()`.
+*   **Modification Rule:** Always check the current contents of a partial (using `view_file` or reviewing `git diff`) before attempting to modify it, as they are frequently edited directly by the user outside of these interactions.
 
 ### 2.3 Pages (`pg_`)
 *   **Location:** `src/pages/[section]/`
