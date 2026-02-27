@@ -1,0 +1,80 @@
+/* 1990s Taco Bell Interior Vibe */
+@import url('https://fonts.googleapis.com/css2?family=Bree+Serif&family=Heebo:wght@400;700&display=swap');
+
+/* Apply the flared-serif logo font to headings */
+body.wrvcss h1,
+body.wrvcss h2,
+body.wrvcss h3,
+body.wrvcss .wrv-nav {
+    font-family: 'Bree Serif', serif;
+}
+
+body.wrvcss {
+    background-color: #f7f5f0;
+    /* Off-white tile background */
+    font-family: 'Heebo', sans-serif;
+    color: #333;
+}
+
+/* Header Styling */
+body.wrvcss .pt-header {
+    background-color: #ffffff;
+    border-bottom: 4px solid #38827e;
+    /* Teal */
+    padding: 10px 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+body.wrvcss .pt-header .wrv-nav {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    font-size: 1.2rem;
+    color: #6b4a8e;
+    /* Deep purple */
+}
+
+body.wrvcss .pt-header .wrv-nav a {
+    color: #6b4a8e;
+    text-decoration: none;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+body.wrvcss .pt-header .wrv-nav a:hover {
+    color: #38827e;
+}
+
+/* Vertical Menu Styling */
+body.wrvcss .pt-vertical-menu ul {
+    background-color: #ffffff;
+    /* Adding the classic 90s aesthetic stripes to the side menu border */
+    border-right: 8px solid;
+    border-image: linear-gradient(to bottom, #c2829b 33%, #6b4a8e 33%, #6b4a8e 66%, #38827e 66%) 1;
+    padding-top: 20px;
+}
+
+body.wrvcss .pt-vertical-menu a {
+    color: #6b4a8e;
+    font-weight: bold;
+    font-size: 1.1rem;
+    text-decoration: none;
+    font-family: 'Bree Serif', serif;
+}
+
+body.wrvcss .pt-vertical-menu a:hover {
+    color: #c2829b;
+    /* Mauve pink */
+}
+
+/* Page content area retro flair */
+body.wrvcss .content {
+    background-color: #ffffff;
+    margin: 20px;
+    padding: 30px;
+    border-radius: 8px;
+    border-top: 15px solid;
+    /* The classic 3-stripe pattern */
+    border-image: linear-gradient(to right, #c2829b 33%, #6b4a8e 33%, #6b4a8e 66%, #38827e 66%) 1;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+}

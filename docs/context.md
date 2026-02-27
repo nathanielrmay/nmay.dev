@@ -95,6 +95,7 @@ X:\projects\dev\public_web\
 │   ├── index.php           # Front Controller
 │   ├── .htaccess           # Apache Routing Rules
 │   ├── lib\
+│   │   ├── api\            # API client classes (e.g. `aApiClient.php`, `placesApiClient.php`)
 │   │   ├── basket.php      # Autoloader, Page Inspector, & Render Helper
 │   │   ├── content.php     # Rendering Wrapper
 │   │   ├── nmay.css        # Site css rules
@@ -104,14 +105,19 @@ X:\projects\dev\public_web\
 │   │   │   ├── iPartial.php
 │   │   │   └── aPartial.php
 │   │   ├── db\             # Database connection & Models (db_*)
+│   │   │   └── models\
+│   │   │       ├── web\    # Internal web db models (db_users)
+│   │   │       ├── panal\  # External sports db models
+│   │   │       └── wrv\    # WRV database models
 │   │   └── partials\       # Global layout fragments
 │   └── pages\   
 │       ├── pg_404.php      # Error Page
 │       ├── pg_index.php    # Home Page content
 │       ├── account\        # User Account pages (pg_*)
-        └── [sections]      # Content section with different subject matters
-                    ├── aAbstractC  # Many sections will have their own abstract class used to replace the menu's or to tell the controller to do something specific for this section
-                    ├── partial\    # A content section can have it's own partial directory, with it's own menu or header or partials that will be re used within the section    
+│       └── [sections]      # Content section with different subject matters (e.g., wrv, sports_anals)
+│                   ├── aAbstractC  # Many sections will have their own abstract class used to replace the menu's or to tell the controller to do something specific for this section
+│                   ├── lib\
+│                   │   └── partials\ # A content section can have its own partials directory (e.g., pt_header.php)
 
 ---
 
