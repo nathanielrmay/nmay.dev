@@ -60,7 +60,6 @@
             <p style="color: #999; font-style: italic;">No restaurants added yet.</p>
         </div>
     </div>
-    <input type="hidden" name="restaurants_json" id="restaurants-json" value='<?= htmlspecialchars($initialRosterJson ?? '[]') ?>'>
 
     <script>
     (function() {
@@ -114,7 +113,7 @@
             }
 
             // AJAX call to resolve/create the place
-            fetch('/wrv/food/pg_api_places.php', {
+            fetch('/wrv/food/lib/ajax/pg_api_places.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ place_id: googlePlaceId, place_name: placeName })

@@ -8,9 +8,9 @@
  * This file lives in the pages directory so the front controller
  * routes to it, but we output JSON and exit before the layout renders.
  */
-namespace pages\wrv\food;
+namespace pages\wrv\food\lib\ajax;
 
-require_once __DIR__ . '/aFoodPage.php';
+require_once __DIR__ . '/../../aFoodPage.php';
 
 use lib\basket;
 use lib\db\models\wrv\db_places_place;

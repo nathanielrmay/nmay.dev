@@ -181,7 +181,10 @@ $initialRosterJson = json_encode($jsEntries);
                 <div>
                     <label style="font-weight: bold; display: block; margin-bottom: 5px;">Status:</label>
                     <select name="war_status" style="padding: 8px; font-size: 1rem; border-radius: 4px; border: 1px solid #ccc; width: 100%; max-width: 300px;">
-                        <?php foreach ($allStatuses as $status): ?>
+                        <?php foreach ($allStatuses as $status): 
+                            // Skip round-based statuses for now
+                            if (in_array($status['status'], ['rnd1', 'rnd2', 'rnd3'])) continue;
+                        ?>
                             <option value="<?= $status['pk'] ?>" <?= ($selectedWar && $selectedWar['fk_status'] == $status['pk']) ? 'selected' : '' ?>>
                                 <?= htmlspecialchars($status['status']) ?>
                             </option>
@@ -191,25 +194,11 @@ $initialRosterJson = json_encode($jsEntries);
             </div>
         </div>
 
-        <!-- Restaurant Search + Roster (managed by the partial) -->
-        <div style="background-color: #fafafa; padding: 20px; border-radius: 8px; border: 1px solid #ccc; margin-bottom: 20px;">
-            <h3>Restaurants</h3>
-            <?php 
-            $searchArgs = [
-                'searchResults'    => $searchResults,
-                'searchQuery'      => $_POST['search_query'] ?? '',
-                'searchLocation'   => $_POST['location'] ?? 'Springfield, Missouri',
-                'formAction'       => '/wrv/food/pg_idc_wars.php' . ($selectedWar ? '?war=' . $selectedWar['pk'] : ''),
-                'error'            => $error,
-                'useJsSelect'      => true,
-                'initialRosterJson' => $initialRosterJson
-            ];
-            echo basket::render('pages/wrv/food/lib/partials/pt_search_places.php', $searchArgs); 
-            ?>
-        </div>
+        <!-- Hidden input synced by the partial's JS -->
+        <input type="hidden" name="restaurants_json" id="restaurants-json" value='<?= htmlspecialchars($initialRosterJson) ?>'>
 
         <!-- Bottom Buttons -->
-        <div style="display: flex; gap: 15px; justify-content: flex-end;">
+        <div style="display: flex; gap: 15px; justify-content: flex-end; margin-top: 20px;">
             <a href="/wrv/food/pg_idc_wars.php" 
                style="padding: 10px 25px; background-color: #888; color: white; border: none; border-radius: 4px; font-size: 1rem; font-weight: bold; cursor: pointer; text-decoration: none; display: inline-block;">
                 New / Clear
@@ -220,4 +209,21 @@ $initialRosterJson = json_encode($jsEntries);
             </button>
         </div>
     </form>
+
+    <!-- Restaurant Search + Roster (OUTSIDE the war form to avoid nested form issues) -->
+    <div style="background-color: #fafafa; padding: 20px; border-radius: 8px; border: 1px solid #ccc; margin-bottom: 20px;">
+        <h3>Restaurants</h3>
+        <?php 
+        $searchArgs = [
+            'searchResults'    => $searchResults,
+            'searchQuery'      => $_POST['search_query'] ?? '',
+            'searchLocation'   => $_POST['location'] ?? 'Springfield, Missouri',
+            'formAction'       => '/wrv/food/pg_idc_wars.php' . ($selectedWar ? '?war=' . $selectedWar['pk'] : ''),
+            'error'            => $error,
+            'useJsSelect'      => true,
+            'initialRosterJson' => $initialRosterJson
+        ];
+        echo basket::render('pages/wrv/food/lib/partials/pt_search_places.php', $searchArgs); 
+        ?>
+    </div>
 </div>
