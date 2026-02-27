@@ -143,4 +143,5 @@ All rules in section-specific stylesheets MUST be prefixed with the body class t
 *   **HTML Structure:** Partials using this scoping SHOULD wrap their entire output in a div named after the partial (e.g., `<div class="pt-header">...</div>`).
 ```
 
-```
+## 6. Tooling & Dependencies
+When completing tasks or building features, if a clearly superior standard or library exists (e.g., using `cURL` over `file_get_contents` for HTTP requests), but it requires installing additional OS-level software or modules (like `php-curl`), you MUST inform the user and ask for their preference before falling back to an inferior solution. The user is willing to install necessary packages if it results in better code.
