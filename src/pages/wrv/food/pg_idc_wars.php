@@ -197,17 +197,6 @@ $initialRosterJson = json_encode($jsEntries);
         <!-- Hidden input synced by the partial's JS -->
         <input type="hidden" name="restaurants_json" id="restaurants-json" value='<?= htmlspecialchars($initialRosterJson) ?>'>
 
-        <!-- Bottom Buttons -->
-        <div style="display: flex; gap: 15px; justify-content: flex-end; margin-top: 20px;">
-            <a href="/wrv/food/pg_idc_wars.php" 
-               style="padding: 10px 25px; background-color: #888; color: white; border: none; border-radius: 4px; font-size: 1rem; font-weight: bold; cursor: pointer; text-decoration: none; display: inline-block;">
-                New / Clear
-            </a>
-            <button type="submit" name="submit_war" value="1"
-                    style="padding: 10px 25px; background-color: #38827e; color: white; border: none; border-radius: 4px; font-size: 1rem; font-weight: bold; cursor: pointer;">
-                Submit Changes
-            </button>
-        </div>
     </form>
 
     <!-- Restaurant Search + Roster (OUTSIDE the war form to avoid nested form issues) -->
@@ -226,4 +215,48 @@ $initialRosterJson = json_encode($jsEntries);
         echo basket::render('pages/wrv/food/lib/partials/pt_search_places.php', $searchArgs); 
         ?>
     </div>
+
+    <!-- Bottom Buttons (in their own form so they can submit the war data) -->
+    <form method="POST" action="/wrv/food/pg_idc_wars.php" id="war-submit-form">
+        <input type="hidden" name="existing_war_pk" id="submit-existing-war-pk" value="<?= $selectedWar ? $selectedWar['pk'] : '' ?>">
+        <input type="hidden" name="restaurants_json" id="submit-restaurants-json" value='<?= htmlspecialchars($initialRosterJson) ?>'>
+        <div style="display: flex; gap: 15px; justify-content: flex-end; margin-top: 30px;">
+            <a href="/wrv/food/pg_idc_wars.php" 
+               style="padding: 10px 25px; background-color: #888; color: white; border: none; border-radius: 4px; font-size: 1rem; font-weight: bold; cursor: pointer; text-decoration: none; display: inline-block;">
+                New / Clear
+            </a>
+            <button type="submit" name="submit_war" value="1"
+                    onclick="syncSubmitForm()" 
+                    style="padding: 10px 25px; background-color: #38827e; color: white; border: none; border-radius: 4px; font-size: 1rem; font-weight: bold; cursor: pointer;">
+                Submit Changes
+            </button>
+        </div>
+    </form>
+
+    <script>
+    function syncSubmitForm() {
+        // Copy values from the main war form into the submit form
+        var warForm = document.getElementById('war-form');
+        var submitForm = document.getElementById('war-submit-form');
+        
+        // Copy all named inputs from the war form
+        var inputs = warForm.querySelectorAll('input[name], select[name]');
+        inputs.forEach(function(input) {
+            var existing = submitForm.querySelector('[name="' + input.name + '"]');
+            if (existing) {
+                existing.value = input.value;
+            } else {
+                var hidden = document.createElement('input');
+                hidden.type = 'hidden';
+                hidden.name = input.name;
+                hidden.value = input.tagName === 'SELECT' ? input.options[input.selectedIndex].value : input.value;
+                submitForm.appendChild(hidden);
+            }
+        });
+        
+        // Sync the roster JSON
+        var rosterJson = document.getElementById('restaurants-json');
+        document.getElementById('submit-restaurants-json').value = rosterJson.value;
+    }
+    </script>
 </div>
