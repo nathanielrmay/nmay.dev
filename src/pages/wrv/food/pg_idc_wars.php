@@ -108,7 +108,6 @@ $currentEntries = $entryModel->readEntriesForWar($currentWarPk);
             <div>
                 <label style="font-weight: bold; display: block; margin-bottom: 5px;">Format:</label>
                 <select name="tournament_format" style="padding: 8px; font-size: 1rem; border-radius: 4px; border: 1px solid #ccc; width: 100%; max-width: 300px;">
-                    <option value="round_robin">Round Robin</option>
                     <option value="ranked_choice">Ranked Choice Voting (One Round)</option>
                 </select>
             </div>
