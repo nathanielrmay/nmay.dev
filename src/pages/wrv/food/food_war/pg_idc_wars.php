@@ -1,14 +1,14 @@
 <?php
-namespace pages\wrv\food;
+namespace pages\wrv\food\food_war;
 
-require_once __DIR__ . '/aFoodPage.php';
+require_once __DIR__ . '/aFoodWarPage.php';
 
 use lib\basket;
 use lib\db\models\wrv\db_idc_war;
 use lib\db\models\wrv\db_idc_war_places_place;
 use lib\db\models\wrv\db_idc_war_status;
 
-class pg_idc_wars extends aFoodPage {
+class pg_idc_wars extends aFoodWarPage {
     public function getPageTitle() {
         return "I Don't Care Wars - Setup";
     }
@@ -69,7 +69,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_war'])) {
             }
         }
         
-        header('Location: /wrv/food/pg_idc_wars.php?war=' . $warPk . '&saved=true');
+        header('Location: /wrv/food/food_war/pg_idc_wars.php?war=' . $warPk . '&saved=true');
         exit;
     } else {
         $error = "Failed to save the war.";
@@ -110,7 +110,7 @@ $initialRosterJson = json_encode($jsEntries);
     <!-- War Selector -->
     <div style="margin-bottom: 20px;">
         <label style="font-weight: bold; margin-right: 10px;">Load Existing War:</label>
-        <select id="war-selector" onchange="if(this.value) { window.location.href='/wrv/food/pg_idc_wars.php?war=' + this.value; } else { window.location.href='/wrv/food/pg_idc_wars.php'; }"
+        <select id="war-selector" onchange="if(this.value) { window.location.href='/wrv/food/food_war/pg_idc_wars.php?war=' + this.value; } else { window.location.href='/wrv/food/food_war/pg_idc_wars.php'; }"
                 style="padding: 8px; font-size: 1rem; border-radius: 4px; border: 1px solid #ccc; min-width: 250px;">
             <option value="">-- New War --</option>
             <?php foreach ($allWars as $war): 
@@ -129,7 +129,16 @@ $initialRosterJson = json_encode($jsEntries);
         </div>
     <?php endif; ?>
 
-    <form method="POST" action="/wrv/food/pg_idc_wars.php" id="war-form">
+    <?php if ($selectedWar): ?>
+        <div style="margin-bottom: 20px;">
+            <a href="/wrv/food/food_war/pg_vote.php?war=<?= $selectedWar['pk'] ?>" target="_blank"
+               style="display: inline-block; padding: 8px 15px; background-color: #6b4a8e; color: white; border-radius: 4px; text-decoration: none; font-weight: bold; font-size: 0.95rem;">
+                🔗 Go to Voting Page
+            </a>
+        </div>
+    <?php endif; ?>
+
+    <form method="POST" action="/wrv/food/food_war/pg_idc_wars.php" id="war-form">
         <input type="hidden" name="existing_war_pk" value="<?= $selectedWar ? $selectedWar['pk'] : '' ?>">
         
         <!-- Tournament Setup -->
@@ -221,11 +230,11 @@ $initialRosterJson = json_encode($jsEntries);
     </div>
 
     <!-- Bottom Buttons (in their own form so they can submit the war data) -->
-    <form method="POST" action="/wrv/food/pg_idc_wars.php" id="war-submit-form">
+    <form method="POST" action="/wrv/food/food_war/pg_idc_wars.php" id="war-submit-form">
         <input type="hidden" name="existing_war_pk" id="submit-existing-war-pk" value="<?= $selectedWar ? $selectedWar['pk'] : '' ?>">
         <input type="hidden" name="restaurants_json" id="submit-restaurants-json" value='<?= htmlspecialchars($initialRosterJson) ?>'>
         <div style="display: flex; gap: 15px; justify-content: flex-end; margin-top: 30px;">
-            <a href="/wrv/food/pg_idc_wars.php" 
+            <a href="/wrv/food/food_war/pg_idc_wars.php" 
                style="padding: 10px 25px; background-color: #888; color: white; border: none; border-radius: 4px; font-size: 1rem; font-weight: bold; cursor: pointer; text-decoration: none; display: inline-block;">
                 New / Clear
             </a>

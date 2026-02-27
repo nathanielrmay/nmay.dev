@@ -60,7 +60,7 @@
                 btn.textContent = 'Searching...';
                 resultsDiv.innerHTML = '<p style="color: #666;">Searching...</p>';
 
-                fetch('/wrv/food/lib/ajax/pg_api_search_places.php', {
+                fetch('/wrv/food/food_war/lib/ajax/pg_api_search_places.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ query: query, location: location })
@@ -105,7 +105,7 @@
 
         // --- Place selection (resolve via AJAX, then add to roster or callback) ---
         window.selectPlace = function(googlePlaceId, placeName) {
-            fetch('/wrv/food/lib/ajax/pg_api_places.php', {
+            fetch('/wrv/food/food_war/lib/ajax/pg_api_places.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ place_id: googlePlaceId, place_name: placeName })
