@@ -20,9 +20,12 @@ $savedPlace = null;
 // Handle Search Submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['search_query'])) {
     $query = trim($_POST['search_query']);
+    $location = trim($_POST['location'] ?? 'Springfield, Missouri');
     
     if (!empty($query)) {
         try {
+            $fullQuery = !empty($location) ? $query . ' in ' . $location : $query;
+            
             $config = basket::config();
             $apiKey = $config['google']['places_api_key'] ?? '';
             
@@ -30,7 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['search_query'])) {
                 $error = "Google Places API key is missing from config.php.";
             } else {
                 $client = new placesApiClient($apiKey);
-                $response = $client->searchByText($query);
+                $response = $client->searchByText($fullQuery);
                 $searchResults = $response['results'] ?? [];
             }
         } catch (\Exception $e) {
@@ -90,9 +93,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_id']) && isset(
 
         <!-- Search Form -->
         <form method="POST" action="/wrv/food/pg_create_review.php" style="margin-bottom: 30px; display: flex; gap: 10px;">
-            <input type="text" name="search_query" placeholder="Enter restaurant name (e.g. Taco Bell Austin)" required 
-                   style="flex: 1; padding: 10px; font-size: 1rem; border: 1px solid #ccc; border-radius: 4px;"
+            <input type="text" name="search_query" placeholder="Enter restaurant name (e.g. Taco Bell)" required 
+                   style="flex: 2; padding: 10px; font-size: 1rem; border: 1px solid #ccc; border-radius: 4px;"
                    value="<?= htmlspecialchars($_POST['search_query'] ?? '') ?>">
+            <input type="text" name="location" placeholder="Location" required 
+                   style="flex: 1; padding: 10px; font-size: 1rem; border: 1px solid #ccc; border-radius: 4px;"
+                   value="<?= htmlspecialchars($_POST['location'] ?? 'Springfield, Missouri') ?>">
             <button type="submit" style="padding: 10px 20px; background-color: #6b4a8e; color: white; border: none; border-radius: 4px; font-size: 1rem; cursor: pointer;">
                 Search Maps
             </button>
