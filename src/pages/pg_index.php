@@ -20,39 +20,10 @@ class pg_index extends aPage {
     align-items: center;
     justify-content: center;
     overflow: hidden;
-    /* Define CSS variables that the animation will manipulate */
-    --neon-clr: #ff2d95;
-    --neon-glow-1: rgba(255,45,149,0.5);
-    --neon-glow-2: rgba(255,45,149,0.3);
-    animation: color-cycle 24s linear infinite;
-  }
-
-  /* Define the color cycling animation on the container so children inherit the variables */
-  @keyframes color-cycle {
-    /* Pink */
-    0%, 25% {
-      --neon-clr: #ff2d95;
-      --neon-glow-1: rgba(255,45,149,0.5);
-      --neon-glow-2: rgba(255,45,149,0.3);
-    }
-    /* Light Blue */
-    33%, 58% {
-      --neon-clr: #00f0ff;
-      --neon-glow-1: rgba(0,240,255,0.5);
-      --neon-glow-2: rgba(0,240,255,0.3);
-    }
-    /* Light Green */
-    66%, 91% {
-      --neon-clr: #39ff14;
-      --neon-glow-1: rgba(57,255,20,0.5);
-      --neon-glow-2: rgba(57,255,20,0.3);
-    }
-    /* Back to Pink */
-    100% {
-      --neon-clr: #ff2d95;
-      --neon-glow-1: rgba(255,45,149,0.5);
-      --neon-glow-2: rgba(255,45,149,0.3);
-    }
+    /* Static dark blue neon */
+    --neon-clr: #0055ff;
+    --neon-glow-1: rgba(0,85,255,0.5);
+    --neon-glow-2: rgba(0,85,255,0.3);
   }
 
   .neon-sign {
@@ -64,12 +35,7 @@ class pg_index extends aPage {
     border-radius: 6px;
   }
 
-  /* Note: standard CSS animation on variables requires @property in modern browsers for smooth fading. 
-     Since @property support isn't 100% universal yet, if it snaps instead of fading gracefully, 
-     the fallback is still a cool color change. */
-  @property --neon-clr { syntax: '<color>'; inherits: true; initial-value: #ff2d95; }
-  @property --neon-glow-1 { syntax: '<color>'; inherits: true; initial-value: rgba(255,45,149,0.5); }
-  @property --neon-glow-2 { syntax: '<color>'; inherits: true; initial-value: rgba(255,45,149,0.3); }
+
 
   .neon-text {
     font-family: 'Sacramento', cursive;
