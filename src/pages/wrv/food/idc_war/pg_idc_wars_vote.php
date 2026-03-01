@@ -7,6 +7,7 @@ use lib\basket;
 use lib\db\models\wrv\db_idc_war;
 use lib\db\models\wrv\db_idc_war_places_place;
 use lib\db\models\wrv\db_idc_war_vote;
+use lib\db\models\wrv\db_idc_war_status;
 
 class pg_idc_wars_vote extends aIdcWarPage {
     public function getPageTitle() {
@@ -25,7 +26,6 @@ $success = false;
 
 // If no war is specified, render the War Selection UI instead of failing
 if (!$warPk) {
-    use lib\db\models\wrv\db_idc_war_status;
     $statusModel = new db_idc_war_status($db);
     $allWars = $warModel->readAll();
     $allStatuses = $statusModel->readAll();
@@ -39,7 +39,7 @@ if (!$warPk) {
     // Capture HTML for the selection UI and exit early
     ?>
     <div style="padding: 20px; max-width: 800px;">
-        <h2>Select a War to Settle ⚔️🍔</h2>
+        <h2>Select a War to Settle </h2>
         <p>Choose an active war below to cast your vote.</p>
 
         <!-- Filters -->
