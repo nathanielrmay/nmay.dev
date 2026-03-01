@@ -25,10 +25,10 @@ class pg_index extends aIdcWarPage {
         <h3 style="color: #6b4a8e; margin-top: 25px;">How It Works</h3>
         <ol style="padding-left: 20px; margin-bottom: 0;">
             <li style="margin-bottom: 10px;">
-                <strong>Create a War:</strong> One person sets up a new war, gives it a deadline, and seeds the initial roster of restaurant options.
+                <strong><a href="/wrv/food/idc_war/pg_idc_wars_create.php" style="color: inherit; text-decoration: underline;">Create a War</a>:</strong> One person sets up a new war, gives it a deadline, and seeds the initial roster of restaurant options.
             </li>
             <li style="margin-bottom: 10px;">
-                <strong>Cast Your Votes:</strong> Participants visit the voting page before the deadline and rank the restaurants from their most preferred to their least preferred using a drag-and-drop interface.
+                <strong><a href="/wrv/food/idc_war/pg_idc_wars_vote.php" style="color: inherit; text-decoration: underline;">Cast Your Votes</a>:</strong> Participants visit the voting page before the deadline and rank the restaurants from their most preferred to their least preferred using a drag-and-drop interface.
             </li>
             <li>
                 <strong>Settle the War:</strong> Once the deadline passes or everyone finishes voting, the results are calculated using ranked-choice voting, determining the mathematical winner. No more arguments, no more "I don't care"—the math decides.
