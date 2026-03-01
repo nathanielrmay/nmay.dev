@@ -156,7 +156,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_vote'])) {
     if (is_array($rankings) && count($rankings) > 0) {
         // Validate that user hasn't tampered with PKs by checking against known entries
         $currentEntries = $warPlacesModel->readByWarPk((int)$warPk);
-        $validPks = array_column($currentEntries, 'pk');
+        $validPks = array_column($currentEntries, 'entry_pk');
         
         $cleanRankings = [];
         foreach ($rankings as $pk) {
@@ -207,7 +207,7 @@ if (empty($entries)) {
 
             <div id="vote-list" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 30px;">
                 <?php foreach ($entries as $index => $entry): ?>
-                    <div class="vote-item" data-pk="<?= htmlspecialchars($entry['pk']) ?>" draggable="true" 
+                    <div class="vote-item" data-pk="<?= htmlspecialchars($entry['entry_pk']) ?>" draggable="true" 
                          style="display: flex; align-items: center; justify-content: space-between; padding: 15px; background-color: #f9f9f9; border: 1px solid #ddd; border-radius: 6px; cursor: grab;">
                         <div style="display: flex; align-items: center; gap: 15px;">
                             <span class="rank-number" style="font-weight: bold; font-size: 1.2rem; color: #6b4a8e; width: 30px; text-align: center;">
