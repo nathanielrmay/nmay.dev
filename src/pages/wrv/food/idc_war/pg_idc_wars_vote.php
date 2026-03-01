@@ -23,8 +23,116 @@ $warPk = $_GET['war'] ?? $_POST['war_pk'] ?? null;
 $error = null;
 $success = false;
 
+// If no war is specified, render the War Selection UI instead of failing
 if (!$warPk) {
-    echo "<div style='padding: 20px;'><h3>Error: No war specified.</h3></div>";
+    use lib\db\models\wrv\db_idc_war_status;
+    $statusModel = new db_idc_war_status($db);
+    $allWars = $warModel->readAll();
+    $allStatuses = $statusModel->readAll();
+
+    // Mapping for JS and rendering
+    $statusMap = [];
+    foreach ($allStatuses as $status) {
+        $statusMap[$status['pk']] = $status['status'];
+    }
+
+    // Capture HTML for the selection UI and exit early
+    ?>
+    <div style="padding: 20px; max-width: 800px;">
+        <h2>Select a War to Settle ⚔️🍔</h2>
+        <p>Choose an active war below to cast your vote.</p>
+
+        <!-- Filters -->
+        <div style="background-color: #fafafa; padding: 15px; border-radius: 8px; border: 1px solid #ccc; margin-bottom: 20px; display: flex; gap: 20px; flex-wrap: wrap;">
+            <div style="flex: 1; min-width: 200px;">
+                <label style="font-weight: bold; display: block; margin-bottom: 5px;">Filter by Name:</label>
+                <input type="text" id="filter-name" placeholder="Search..." style="padding: 8px; font-size: 1rem; border-radius: 4px; border: 1px solid #ccc; width: 100%;">
+            </div>
+            <div style="flex: 1; min-width: 200px;">
+                <label style="font-weight: bold; display: block; margin-bottom: 5px;">Filter by Status:</label>
+                <select id="filter-status" style="padding: 8px; font-size: 1rem; border-radius: 4px; border: 1px solid #ccc; width: 100%;">
+                    <option value="all">-- All Statuses --</option>
+                    <?php foreach ($allStatuses as $status): ?>
+                        <option value="<?= $status['pk'] ?>" <?= $status['pk'] == 1 ? 'selected' : '' ?>>
+                            <?= htmlspecialchars($status['status']) ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+        </div>
+
+        <!-- Render List of Wars -->
+        <div id="war-selection-list">
+            <?php if (empty($allWars)): ?>
+                <p>No wars have been created yet.</p>
+            <?php else: ?>
+                <ul style="list-style: none; padding-left: 0; margin: 0;">
+                    <?php foreach ($allWars as $war): 
+                        $statusName = $statusMap[$war['fk_status']] ?? 'Unknown';
+                        $statusColor = '#555';
+                        if ($war['fk_status'] == 1) $statusColor = '#008000'; // rnd 1
+                        if ($war['fk_status'] == 4) $statusColor = '#888888'; // complete
+                        if ($war['fk_status'] == 5) $statusColor = '#e68a00'; // creation
+                    ?>
+                        <li class="war-card" data-name="<?= htmlspecialchars(strtolower($war['name'])) ?>" data-status="<?= $war['fk_status'] ?>"
+                            style="margin-bottom: 15px; padding: 15px; border: 1px solid #ddd; border-radius: 8px; background-color: #fafafa; display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <h3 style="margin-top: 0; margin-bottom: 5px;"><?= htmlspecialchars($war['name'] ?: "War #{$war['pk']}") ?></h3>
+                                <p style="margin: 0; font-size: 0.9em; color: #444;">
+                                    Status: <span style="font-weight: bold; color: <?= $statusColor ?>;"><?= htmlspecialchars($statusName) ?></span> <br>
+                                    Deadline: <?= $war['deadline'] ? date('M j, Y, t:i a', strtotime($war['deadline'])) . ' UTC' : 'None' ?>
+                                </p>
+                            </div>
+                            <div>
+                                <?php if ($war['fk_status'] == 1): // Voting open ?>
+                                    <a href="/wrv/food/idc_war/pg_idc_wars_vote.php?war=<?= $war['pk'] ?>" style="padding: 8px 16px; background-color: #6b4a8e; color: white; text-decoration: none; border-radius: 4px; font-weight: bold;">Vote</a>
+                                <?php elseif ($war['fk_status'] == 4): // Complete ?>
+                                    <a href="/wrv/food/idc_war/pg_idc_wars_vote.php?war=<?= $war['pk'] ?>" style="padding: 8px 16px; background-color: #38827e; color: white; text-decoration: none; border-radius: 4px; font-weight: bold;">Results</a>
+                                <?php else: // Creation or other ?>
+                                    <a href="/wrv/food/idc_war/pg_idc_wars_create.php?war=<?= $war['pk'] ?>" style="padding: 8px 16px; background-color: #eee; color: #333; text-decoration: none; border-radius: 4px; font-weight: bold; border: 1px solid #ccc;">Manage</a>
+                                <?php endif; ?>
+                            </div>
+                        </li>
+                    <?php endforeach; ?>
+                </ul>
+            <?php endif; ?>
+        </div>
+    </div>
+
+    <!-- Vanilla JS to control the filtering instantly -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const nameInput = document.getElementById('filter-name');
+            const statusSelect = document.getElementById('filter-status');
+            const warCards = document.querySelectorAll('.war-card');
+
+            function filterWars() {
+                const nameQuery = nameInput.value.toLowerCase();
+                const statusQuery = statusSelect.value;
+
+                warCards.forEach(card => {
+                    const cardName = card.getAttribute('data-name');
+                    const cardStatus = card.getAttribute('data-status');
+                    
+                    const matchesName = cardName.includes(nameQuery);
+                    const matchesStatus = statusQuery === 'all' || statusQuery === cardStatus;
+
+                    if (matchesName && matchesStatus) {
+                        card.style.display = 'flex';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+            }
+
+            nameInput.addEventListener('input', filterWars);
+            statusSelect.addEventListener('change', filterWars);
+            
+            // Run once on load to respect the default 'rnd1' selection
+            filterWars();
+        });
+    </script>
+    <?php
     return;
 }
 
