@@ -14,6 +14,8 @@ require_once __DIR__ . '/../../aFoodWarPage.php';
 
 use lib\basket;
 use lib\db\models\wrv\db_places_place;
+use lib\db\models\wrv\db_places_cache;
+use lib\api\places\placesApiClient;
 
 // Only handle POST AJAX requests
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -65,6 +67,32 @@ try {
     ]);
 
     if ($newPk) {
+        // Try to fetch extended details from Google to cache
+        try {
+            $config = basket::config();
+            $apiKey = $config['google']['places_api_key'] ?? '';
+            
+            if ($apiKey) {
+                $client = new placesApiClient($apiKey);
+                $response = $client->getPlaceDetails($googlePlaceId);
+                $details = $response['result'] ?? null;
+                
+                if ($details) {
+                    $cacheModel = new db_places_cache($db);
+                    $cacheModel->write((int)$newPk, [
+                        'formatted_address' => $details['formatted_address'] ?? null,
+                        'phone_number' => $details['formatted_phone_number'] ?? null,
+                        'website' => $details['website'] ?? null,
+                        'price_level' => isset($details['price_level']) ? (int)$details['price_level'] : null,
+                        'rating' => isset($details['rating']) ? (float)$details['rating'] : null,
+                        'user_ratings_total' => isset($details['user_ratings_total']) ? (int)$details['user_ratings_total'] : null,
+                    ]);
+                }
+            }
+        } catch (\Exception $ex) {
+            error_log("Failed to cache place details for $googlePlaceId: " . $ex->getMessage());
+        }
+
         echo json_encode([
             'pk' => (int)$newPk,
             'id' => $googlePlaceId,
