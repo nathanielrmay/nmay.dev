@@ -104,8 +104,8 @@ $initialRosterJson = json_encode($jsEntries);
 ?>
 
 <div style="padding: 20px; max-width: 800px;">
-    <h2>I Don't Care (IDC) Wars ⚔️🍔</h2>
-    <p>For when nobody can make up their mind on where to eat.</p>
+    <h2>I Don't Care (IDC) Wars</h2>
+    <p>Create the battlefield and choose the sides.</p>
     
     <!-- War Selector -->
     <div style="margin-bottom: 20px;">
@@ -218,12 +218,20 @@ $initialRosterJson = json_encode($jsEntries);
     <!-- Restaurant Search + Roster (OUTSIDE the war form to avoid nested form issues) -->
     <div style="background-color: #fafafa; padding: 20px; border-radius: 8px; border: 1px solid #ccc; margin-bottom: 20px;">
         <h3>Restaurants</h3>
+
+        <!-- Roster managed by JS -->
+        <div style="margin-bottom: 20px; padding-bottom: 20px; border-bottom: 2px solid #ddd;">
+            <h3>Current Roster (<span id="roster-count">0</span>)</h3>
+            <div id="roster-list">
+                <p style="color: #999; font-style: italic;">No restaurants added yet.</p>
+            </div>
+        </div>
+
         <?php 
+        $canAddRestaurants = (!$selectedWar || $selectedWar['fk_status'] == 5);
         $searchArgs = [
             'error'             => $error,
-            'showRoster'        => true,
-            'initialRosterJson' => $initialRosterJson,
-            'canAddRestaurants' => (!$selectedWar || $selectedWar['fk_status'] == 5)
+            'canAddRestaurants' => $canAddRestaurants
         ];
         echo basket::render('pages/wrv/food/lib/partials/pt_search_places.php', $searchArgs); 
         ?>
@@ -247,6 +255,75 @@ $initialRosterJson = json_encode($jsEntries);
     </form>
 
     <script>
+    var roster = <?= $initialRosterJson ?? '[]' ?>;
+    var canAddRestaurants = <?= json_encode($canAddRestaurants ?? true) ?>;
+
+    // Listen for place selection from the partial
+    document.addEventListener('placeSelected', function(e) {
+        var data = e.detail;
+        
+        // Check for duplicate
+        for (var i = 0; i < roster.length; i++) {
+            if (roster[i].google_place_id === data.id) {
+                alert(data.name + ' is already in the roster!');
+                return;
+            }
+        }
+        roster.push({
+            place_pk: data.pk,
+            place_name: data.name,
+            google_place_id: data.id
+        });
+        renderRoster();
+    });
+
+    // --- Roster rendering ---
+    function renderRoster() {
+        var list = document.getElementById('roster-list');
+        var count = document.getElementById('roster-count');
+        var jsonInput = document.getElementById('restaurants-json');
+
+        count.textContent = roster.length;
+        if (jsonInput) jsonInput.value = JSON.stringify(roster);
+        // Also sync to submit form if it exists
+        var submitJson = document.getElementById('submit-restaurants-json');
+        if (submitJson) submitJson.value = JSON.stringify(roster);
+
+        if (roster.length === 0) {
+            list.innerHTML = '<p style="color: #999; font-style: italic;">No restaurants added yet.</p>';
+            return;
+        }
+
+        var html = '<div style="display: flex; flex-direction: column; gap: 10px;">';
+        roster.forEach(function(r, i) {
+            html += '<div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; background-color: #fff; border: 1px solid #ddd; border-radius: 5px;">';
+            html += '<div>';
+            html += '<span style="font-weight: bold; color: #6b4a8e; margin-right: 8px;">' + (i + 1) + '.</span>';
+            html += '<span style="font-size: 1.05em; color: #333;">' + escapeHtml(r.place_name) + '</span>';
+            html += '</div>';
+            if (canAddRestaurants) {
+                html += '<button type="button" onclick="rosterRemove(' + i + ')" style="padding: 5px 12px; background-color: #e74c3c; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.85em;">✕</button>';
+            }
+            html += '</div>';
+        });
+        html += '</div>';
+        list.innerHTML = html;
+    }
+
+    window.rosterRemove = function(index) {
+        roster.splice(index, 1);
+        renderRoster();
+    };
+
+    function escapeHtml(text) {
+        var div = document.createElement('div');
+        div.appendChild(document.createTextNode(text));
+        return div.innerHTML;
+    }
+
+    // Initial render
+    renderRoster();
+
     function syncSubmitForm() {
         // Copy values from the main war form into the submit form
         var warForm = document.getElementById('war-form');

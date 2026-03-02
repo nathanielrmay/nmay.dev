@@ -7,17 +7,6 @@
 
     <?php $canAddRestaurants = $canAddRestaurants ?? true; ?>
 
-    <!-- Roster managed by JS (above search so it stays visible) -->
-    <?php $hasRoster = !empty($showRoster); ?>
-    <?php if ($hasRoster): ?>
-    <div style="margin-bottom: 20px; padding-bottom: 20px; border-bottom: 2px solid #ddd;">
-        <h3>Current Roster (<span id="roster-count">0</span>)</h3>
-        <div id="roster-list">
-            <p style="color: #999; font-style: italic;">No restaurants added yet.</p>
-        </div>
-    </div>
-    <?php endif; ?>
-
     <?php if ($canAddRestaurants): ?>
         <!-- Search Form (AJAX, no page reload) -->
         <form id="places-search-form" style="margin-bottom: 30px; display: flex; gap: 10px;">
@@ -40,9 +29,6 @@
 
     <script>
     (function() {
-        var canAdd = <?= json_encode($canAddRestaurants) ?>;
-        var hasRoster = <?= json_encode($hasRoster) ?>;
-        var roster = <?= $initialRosterJson ?? '[]' ?>;
 
         // --- Search ---
         var searchForm = document.getElementById('places-search-form');
@@ -103,7 +89,7 @@
             });
         }
 
-        // --- Place selection (resolve via AJAX, then add to roster or callback) ---
+        // --- Place selection (resolve via AJAX, then callback) ---
         window.selectPlace = function(googlePlaceId, placeName) {
             fetch('/wrv/food/idc_war/lib/ajax/pg_api_places.php', {
                 method: 'POST',
@@ -117,67 +103,12 @@
                     return;
                 }
 
-                if (hasRoster) {
-                    // Check for duplicate
-                    for (var i = 0; i < roster.length; i++) {
-                        if (roster[i].google_place_id === data.id) {
-                            alert(data.name + ' is already in the roster!');
-                            return;
-                        }
-                    }
-                    roster.push({
-                        place_pk: data.pk,
-                        place_name: data.name,
-                        google_place_id: data.id
-                    });
-                    renderRoster();
-                }
-
                 // Fire a custom event so parent pages can react
                 document.dispatchEvent(new CustomEvent('placeSelected', { detail: data }));
             })
             .catch(function(err) {
                 alert('Network error: ' + err.message);
             });
-        };
-
-        // --- Roster rendering ---
-        function renderRoster() {
-            if (!hasRoster) return;
-            var list = document.getElementById('roster-list');
-            var count = document.getElementById('roster-count');
-            var jsonInput = document.getElementById('restaurants-json');
-
-            count.textContent = roster.length;
-            if (jsonInput) jsonInput.value = JSON.stringify(roster);
-            // Also sync to submit form if it exists
-            var submitJson = document.getElementById('submit-restaurants-json');
-            if (submitJson) submitJson.value = JSON.stringify(roster);
-
-            if (roster.length === 0) {
-                list.innerHTML = '<p style="color: #999; font-style: italic;">No restaurants added yet.</p>';
-                return;
-            }
-
-            var html = '<div style="display: flex; flex-direction: column; gap: 10px;">';
-            roster.forEach(function(r, i) {
-                html += '<div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; background-color: #fff; border: 1px solid #ddd; border-radius: 5px;">';
-                html += '<div>';
-                html += '<span style="font-weight: bold; color: #6b4a8e; margin-right: 8px;">' + (i + 1) + '.</span>';
-                html += '<span style="font-size: 1.05em; color: #333;">' + escapeHtml(r.place_name) + '</span>';
-                html += '</div>';
-                if (canAdd) {
-                    html += '<button type="button" onclick="rosterRemove(' + i + ')" style="padding: 5px 12px; background-color: #e74c3c; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.85em;">✕</button>';
-                }
-                html += '</div>';
-            });
-            html += '</div>';
-            list.innerHTML = html;
-        }
-
-        window.rosterRemove = function(index) {
-            roster.splice(index, 1);
-            renderRoster();
         };
 
         // --- Helpers ---
@@ -190,9 +121,6 @@
         function escapeAttr(text) {
             return text.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '\\"');
         }
-
-        // Initial render
-        renderRoster();
     })();
     </script>
 </div>
