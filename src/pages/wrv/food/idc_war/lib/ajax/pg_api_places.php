@@ -86,6 +86,7 @@ try {
                         'price_level' => isset($details['price_level']) ? (int)$details['price_level'] : null,
                         'rating' => isset($details['rating']) ? (float)$details['rating'] : null,
                         'user_ratings_total' => isset($details['user_ratings_total']) ? (int)$details['user_ratings_total'] : null,
+                        'types' => $details['types'] ?? null,
                     ]);
                 }
             }
