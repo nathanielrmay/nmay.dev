@@ -5,9 +5,9 @@
  * Receives POST JSON: { query: "taco bell", location: "Springfield, Missouri" }
  * Returns JSON: { results: [{ name, formatted_address, place_id }, ...] }
  */
-namespace pages\wrv\food\food_war\lib\ajax;
+namespace pages\wrv\food\idc_war\lib\ajax;
 
-require_once __DIR__ . '/../../aFoodWarPage.php';
+require_once __DIR__ . '/../../aIdcWarPage.php';
 
 use lib\basket;
 use lib\api\places\placesApiClient;
