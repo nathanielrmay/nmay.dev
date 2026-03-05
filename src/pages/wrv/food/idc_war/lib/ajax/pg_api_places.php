@@ -49,62 +49,72 @@ try {
 
     // Check if place already exists
     $existing = $model->readById($googlePlaceId);
+    $placePk = false;
+    $created = false;
 
     if ($existing) {
-        echo json_encode([
-            'pk' => (int)$existing['pk'],
-            'id' => $existing['id'],
-            'name' => $existing['name'],
-            'created' => false
+        $placePk = (int)$existing['pk'];
+        $created = false;
+    }
+    else {
+        $placePk = $model->write([
+            'id' => $googlePlaceId,
+            'name' => $placeName
         ]);
-        exit;
+        $created = true;
     }
 
-    // Create new
-    $newPk = $model->write([
-        'id' => $googlePlaceId,
-        'name' => $placeName
-    ]);
-
-    if ($newPk) {
-        // Try to fetch extended details from Google to cache
+    if ($placePk) {
+        $debugError = null;
+        // Fetch extended details from Google to cache (always fetches when selected to get full data)
         try {
             $config = basket::config();
             $apiKey = $config['google']['places_api_key'] ?? '';
-            
+
             if ($apiKey) {
                 $client = new placesApiClient($apiKey);
                 $response = $client->getPlaceDetails($googlePlaceId);
                 $details = $response['result'] ?? null;
-                
+
                 if ($details) {
                     $cacheModel = new db_places_cache($db);
-                    $cacheModel->write((int)$newPk, [
-                        'formatted_address' => $details['formatted_address'] ?? null,
-                        'phone_number' => $details['formatted_phone_number'] ?? null,
-                        'website' => $details['website'] ?? null,
-                        'price_level' => isset($details['price_level']) ? (int)$details['price_level'] : null,
-                        'rating' => isset($details['rating']) ? (float)$details['rating'] : null,
-                        'user_ratings_total' => isset($details['user_ratings_total']) ? (int)$details['user_ratings_total'] : null,
-                        'types' => $details['types'] ?? null,
-                    ]);
+
+                    // Add the formatted_phone_number to phone_number so it matches what write() expects
+                    $details['phone_number'] = $details['formatted_phone_number'] ?? null;
+
+                    $res = $cacheModel->write((int)$placePk, $details);
+                    if ($res === false) {
+                        $debugError = "db_places_cache write() returned false; Check error_log for PDOException.";
+                    }
+                }
+                else {
+                    $debugError = "Google API returned no result array: " . json_encode($response);
                 }
             }
-        } catch (\Exception $ex) {
+        }
+        catch (\Exception $ex) {
+            $debugError = $ex->getMessage();
             error_log("Failed to cache place details for $googlePlaceId: " . $ex->getMessage());
         }
 
+        if ($debugError) {
+            echo json_encode(['error' => 'Cache error: ' . $debugError]);
+            exit;
+        }
+
         echo json_encode([
-            'pk' => (int)$newPk,
+            'pk' => (int)$placePk,
             'id' => $googlePlaceId,
             'name' => $placeName,
-            'created' => true
+            'created' => $created
         ]);
-    } else {
+    }
+    else {
         http_response_code(500);
         echo json_encode(['error' => 'Failed to save place']);
     }
-} catch (\Exception $e) {
+}
+catch (\Exception $e) {
     http_response_code(500);
     echo json_encode(['error' => $e->getMessage()]);
 }

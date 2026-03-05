@@ -187,7 +187,7 @@ if (empty($entries)) {
 ?>
 
 <div style="padding: 20px; max-width: 800px;">
-    <h2>🍔 Vote: <?= htmlspecialchars($war['name'] ?: "War #{$war['pk']}") ?> ⚔️</h2>
+    <h2> War: <?= htmlspecialchars($war['name'] ?: "War #{$war['pk']}") ?> </h2>
     <p>Rank the following restaurants from best (top) to worst (bottom). Drag and drop or use the arrows to reorder.</p>
 
     <?php if ($success): ?>
