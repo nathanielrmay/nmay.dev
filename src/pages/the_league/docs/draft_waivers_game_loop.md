@@ -1,8 +1,8 @@
 # Draft, Waivers & Game Loop
 
-## League Schedule
+## League Schedules
 
-When leagues are active:
+The league's of interest activity dates are listed below. These are approximate and came from the previous season and/or the current season's schedule.
 
 ### Regular Season Dates
 

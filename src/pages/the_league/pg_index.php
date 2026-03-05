@@ -13,6 +13,5 @@ class pg_index extends aLeaguePage
 ?>
 
 <div class="league-welcome">
-    <h1>The League</h1>
     <img src="/media/pages/the_league/trophy.jpg" alt="The League Trophy">
 </div>

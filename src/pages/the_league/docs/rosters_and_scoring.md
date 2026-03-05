@@ -38,12 +38,7 @@ Assuming 10 teams in the league: 4 sports × 5 player categories = 20 roto categ
 *\*ERA is an inverted category — lower is better.*
 
 ### FPPW — Fantasy Points Per Week
-
-Custom formulas for calculating FPPW by sport (TBD):
-
-- NFL: TBD
-- NBA: TBD
-- MLS: TBD
+See [FPPW scoring](/the_league/pg_mddocs.php?doc=fppw)
 
 ---
 
