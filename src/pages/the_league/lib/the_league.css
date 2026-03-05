@@ -1,0 +1,187 @@
+/* ==========================================================================
+   The League - Section Styles
+   Scoped under body.the-league
+   ========================================================================== */
+
+/* --- Header Nav --- */
+.the-league .header {
+    background-color: #1a2a3a;
+    border-bottom: 3px solid #d4a84b;
+    padding: 0;
+}
+
+.the-league .pt-header .league-nav {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 10px 20px;
+    font-family: 'Roboto', sans-serif;
+    font-weight: 600;
+    font-size: 0.95em;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+}
+
+.the-league .pt-header .league-nav a {
+    color: #e8e0d4;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.the-league .pt-header .league-nav a:hover {
+    color: #d4a84b;
+}
+
+.the-league .pt-header .league-nav .sep {
+    color: #4a5a6a;
+    font-weight: 300;
+}
+
+.the-league .pt-header .league-nav .menu-toggle {
+    color: #e8e0d4;
+    border-color: #4a5a6a;
+    padding: 3px 10px;
+    font-size: 1.1em;
+}
+
+.the-league .pt-header .league-nav .menu-toggle:hover {
+    background: rgba(212, 168, 75, 0.15);
+    border-color: #d4a84b;
+}
+
+.the-league .league-tagline {
+    margin-left: auto;
+    color: #6a7a8a;
+    font-size: 0.75em;
+    font-weight: 300;
+    letter-spacing: 0.08em;
+    font-style: italic;
+    text-transform: none;
+}
+
+/* --- Sidebar --- */
+.the-league .vertical_menu {
+    border-right: 1px solid #ddd5c9;
+}
+
+.the-league .vertical_menu ul li {
+    margin-bottom: 8px;
+}
+
+.the-league .vertical_menu a {
+    color: #2a4a6a;
+    font-weight: 600;
+    font-size: 0.95em;
+    transition: color 0.2s;
+}
+
+.the-league .vertical_menu a:hover {
+    color: #d4a84b;
+}
+
+.the-league .vertical_menu hr {
+    border: 0;
+    height: 1px;
+    background: #ddd5c9;
+    margin: 12px 0;
+}
+
+/* --- Layout --- */
+.the-league .league-welcome {
+    padding: 20px;
+}
+
+.the-league .league-welcome h1 {
+    margin-top: 0;
+}
+
+/* --- Markdown Content --- */
+.md-content {
+    padding: 20px;
+    line-height: 1.7;
+}
+
+.md-content h1,
+.md-content h2,
+.md-content h3,
+.md-content h4 {
+    margin-top: 1.4em;
+    margin-bottom: 0.6em;
+}
+
+.md-content h1:first-child,
+.md-content h2:first-child {
+    margin-top: 0;
+}
+
+.md-content ul,
+.md-content ol {
+    padding-left: 24px;
+    margin-bottom: 1em;
+}
+
+.md-content li {
+    margin-bottom: 0.3em;
+}
+
+.md-content code {
+    background: rgba(128, 128, 128, 0.15);
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 0.9em;
+}
+
+.md-content pre {
+    background: rgba(128, 128, 128, 0.1);
+    padding: 14px 18px;
+    border-radius: 6px;
+    overflow-x: auto;
+    margin-bottom: 1em;
+}
+
+.md-content pre code {
+    background: none;
+    padding: 0;
+}
+
+.md-content blockquote {
+    border-left: 3px solid rgba(128, 128, 128, 0.4);
+    margin: 1em 0;
+    padding: 0.5em 1em;
+    color: inherit;
+    opacity: 0.85;
+}
+
+.md-content table {
+    border-collapse: collapse;
+    width: 100%;
+    margin-bottom: 1em;
+}
+
+.md-content th,
+.md-content td {
+    border: 1px solid rgba(128, 128, 128, 0.3);
+    padding: 8px 12px;
+    text-align: left;
+}
+
+.md-content th {
+    font-weight: 600;
+}
+
+.md-content hr {
+    border: none;
+    border-top: 1px solid rgba(128, 128, 128, 0.3);
+    margin: 2em 0;
+}
+
+/* --- Not Found --- */
+.md-not-found {
+    text-align: center;
+    padding: 60px 20px;
+}
+
+.md-not-found a {
+    display: inline-block;
+    margin-top: 10px;
+}

@@ -6,7 +6,9 @@
 
 # Allow src and docs folders
 !src/
+!src/**
 !docs/
+!docs/**
 
 # Specifically ignore the database config
 src/config.php
