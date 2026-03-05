@@ -3,60 +3,28 @@
    Scoped under body.the-league
    ========================================================================== */
 
-/* --- Header Nav --- */
-.the-league .header {
-    background-color: #1a2a3a;
-    border-bottom: 3px solid #d4a84b;
-    padding: 0;
-}
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Roboto:wght@300;400;700&display=swap');
 
+/* --- Header Nav --- */
 .the-league .pt-header .league-nav {
     display: flex;
     align-items: center;
-    gap: 14px;
+    gap: 15px;
     padding: 10px 20px;
-    font-family: 'Roboto', sans-serif;
+    font-family: 'Oswald', sans-serif;
     font-weight: 600;
-    font-size: 0.95em;
-    letter-spacing: 0.03em;
+    font-size: 1.2rem;
     text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
 .the-league .pt-header .league-nav a {
-    color: #e8e0d4;
+    color: var(--accent);
     text-decoration: none;
-    transition: color 0.2s;
 }
 
 .the-league .pt-header .league-nav a:hover {
-    color: #d4a84b;
-}
-
-.the-league .pt-header .league-nav .sep {
-    color: #4a5a6a;
-    font-weight: 300;
-}
-
-.the-league .pt-header .league-nav .menu-toggle {
-    color: #e8e0d4;
-    border-color: #4a5a6a;
-    padding: 3px 10px;
-    font-size: 1.1em;
-}
-
-.the-league .pt-header .league-nav .menu-toggle:hover {
-    background: rgba(212, 168, 75, 0.15);
-    border-color: #d4a84b;
-}
-
-.the-league .league-tagline {
-    margin-left: auto;
-    color: #6a7a8a;
-    font-size: 0.75em;
-    font-weight: 300;
-    letter-spacing: 0.08em;
-    font-style: italic;
-    text-transform: none;
+    opacity: 0.7;
 }
 
 /* --- Sidebar --- */
@@ -69,14 +37,8 @@
 }
 
 .the-league .vertical_menu a {
-    color: #2a4a6a;
     font-weight: 600;
     font-size: 0.95em;
-    transition: color 0.2s;
-}
-
-.the-league .vertical_menu a:hover {
-    color: #d4a84b;
 }
 
 .the-league .vertical_menu hr {
